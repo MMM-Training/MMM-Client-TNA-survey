@@ -2894,6 +2894,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               ]
             },
             columns: ["NA", "1", "2", "3", "4"],
+            rateSubOptions: true,
             required: true,
           },
           {
@@ -3110,6 +3111,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               ]
             },
             columns: ["NA", "1", "2", "3", "4"],
+            rateSubOptions: true,
             required: true,
           },
           {
@@ -3326,6 +3328,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               ]
             },
             columns: ["NA", "1", "2", "3", "4"],
+            rateSubOptions: true,
             required: true,
           },
           {
@@ -3538,6 +3541,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               ]
             },
             columns: ["NA", "1", "2", "3", "4"],
+            rateSubOptions: true,
             required: true,
           },
           {
@@ -3748,6 +3752,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               ]
             },
             columns: ["NA", "1", "2", "3", "4"],
+            rateSubOptions: true,
             required: true,
           },
           {
@@ -3961,6 +3966,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               ]
             },
             columns: ["NA", "1", "2", "3", "4"],
+            rateSubOptions: true,
             required: true,
           },
           {
@@ -4174,6 +4180,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               ]
             },
             columns: ["NA", "1", "2", "3", "4"],
+            rateSubOptions: true,
             required: true,
           },
           {
@@ -4384,6 +4391,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               ]
             },
             columns: ["NA", "1", "2", "3", "4"],
+            rateSubOptions: true,
             required: true,
           },
           {
@@ -4594,6 +4602,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               ]
             },
             columns: ["NA", "1", "2", "3", "4"],
+            rateSubOptions: true,
             required: true,
           },
           {

@@ -44,6 +44,7 @@ export interface Question {
   maxLabel?: string; // For scale
   stepLabels?: Record<number, string>; // For scale
   dynamicRowsFrom?: string | string[]; // ID(s) of checkbox question(s) to pull rows from
+  rateSubOptions?: boolean;
 }
 
 export interface Section {

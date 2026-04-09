@@ -204,6 +204,20 @@ function SurveyApp() {
                   isValid = false;
                 }
               }
+
+              // Check for sub-option ratings
+              if (q.rateSubOptions && q.rowsWithCheckboxes?.[row] && gridVal[row] && gridVal[row] !== "NA") {
+                const selectedSubOptions = (formData[`${q.id}_details`] as Record<string, any>)?.[row] as string[];
+                const ratings = (formData[`${q.id}_details`] as Record<string, any>)?.[`${row}_ratings`] as Record<string, string>;
+                
+                if (selectedSubOptions && selectedSubOptions.length > 0) {
+                  const missingRatings = selectedSubOptions.filter(opt => !ratings?.[opt]);
+                  if (missingRatings.length > 0) {
+                    newErrors[q.id] = `Please rate all selected tools for: ${row}`;
+                    isValid = false;
+                  }
+                }
+              }
             });
           }
         } else if (val === "Other" || (Array.isArray(val) && val.includes("Other"))) {
@@ -224,6 +238,24 @@ function SurveyApp() {
             newErrors[q.id] = `Please specify details for: ${missingDetails.join(", ")}`;
             isValid = false;
           }
+        }
+
+        // Check for sub-option ratings in checkbox type
+        if (q.rateSubOptions && q.optionsWithCheckboxes && Array.isArray(val)) {
+          val.forEach(option => {
+            if (q.optionsWithCheckboxes?.[option]) {
+              const selectedSubOptions = (formData[`${q.id}_details`] as Record<string, any>)?.[option] as string[];
+              const ratings = (formData[`${q.id}_details`] as Record<string, any>)?.[`${option}_ratings`] as Record<string, string>;
+              
+              if (selectedSubOptions && selectedSubOptions.length > 0) {
+                const missingRatings = selectedSubOptions.filter(opt => !ratings?.[opt]);
+                if (missingRatings.length > 0) {
+                  newErrors[q.id] = `Please rate all selected modules for: ${option}`;
+                  isValid = false;
+                }
+              }
+            }
+          });
         }
       }
 
