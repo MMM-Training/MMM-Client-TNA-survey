@@ -210,82 +210,84 @@ export function QuestionRenderer({
                         const currentRating = ratings[subOption];
                         
                         return (
-                          <React.Fragment key={subOption}>
-                            <div className="space-y-2">
-                              <label 
-                                className={`flex items-center p-3 rounded-lg border cursor-pointer transition-all text-sm ${
-                                  isChecked 
-                                    ? "border-brand-teal bg-brand-teal/5 text-brand-teal" 
-                                    : "border-slate-200 bg-white hover:border-slate-300"
-                                }`}
-                              >
-                              <input
-                                type="checkbox"
-                                checked={isChecked}
-                                onChange={() => {
-                                  const nextValues = isChecked
-                                    ? subValues.filter((v: string) => v !== subOption)
-                                    : [...subValues, subOption];
-                                  onOptionDetailChange?.(option, nextValues);
+                          <div key={subOption} className="space-y-2">
+                            <div 
+                              className={`flex flex-col sm:flex-row sm:items-center gap-3 p-2 rounded-lg border transition-all ${
+                                isChecked 
+                                  ? "border-brand-teal bg-brand-teal/5" 
+                                  : "border-slate-200 bg-white hover:border-slate-300"
+                              }`}
+                            >
+                              <label className="flex items-center cursor-pointer flex-1 min-w-0">
+                                <input
+                                  type="checkbox"
+                                  checked={isChecked}
+                                  onChange={() => {
+                                    const nextValues = isChecked
+                                      ? subValues.filter((v: string) => v !== subOption)
+                                      : [...subValues, subOption];
+                                    onOptionDetailChange?.(option, nextValues);
 
-                                  if (isChecked) {
-                                    const nextRatings = { ...ratings };
-                                    delete nextRatings[subOption];
-                                    onOptionDetailChange?.(`${option}_ratings`, nextRatings);
-                                  }
-                                }}
-                                className="hidden"
-                              />
-                              <div className={`w-4 h-4 rounded border flex items-center justify-center mr-3 flex-shrink-0 ${
-                                isChecked ? "bg-brand-teal border-brand-teal" : "border-slate-300"
-                              }`}>
-                                {isChecked && <Check className="w-3 h-3 text-white" />}
+                                    if (isChecked) {
+                                      const nextRatings = { ...ratings };
+                                      delete nextRatings[subOption];
+                                      onOptionDetailChange?.(`${option}_ratings`, nextRatings);
+                                    }
+                                  }}
+                                  className="hidden"
+                                />
+                                <div className={`w-4 h-4 rounded border flex items-center justify-center mr-3 flex-shrink-0 ${
+                                  isChecked ? "bg-brand-teal border-brand-teal" : "border-slate-300"
+                                }`}>
+                                  {isChecked && <Check className="w-3 h-3 text-white" />}
+                                </div>
+                                <span className={`leading-tight font-medium text-sm ${isChecked ? "text-brand-teal" : "text-slate-700"}`}>
+                                  {subOption}
+                                </span>
+                              </label>
+
+                              {isChecked && question.rateSubOptions && (
+                                <motion.div 
+                                  initial={{ opacity: 0, x: 10 }}
+                                  animate={{ opacity: 1, x: 0 }}
+                                  className="flex flex-wrap gap-1"
+                                >
+                                  {(question.columns || ["NA", "1", "2", "3", "4"]).map((col) => (
+                                    <button
+                                      key={col}
+                                      type="button"
+                                      onClick={() => {
+                                        onOptionDetailChange?.(`${option}_ratings`, {
+                                          ...ratings,
+                                          [subOption]: col
+                                        });
+                                      }}
+                                      className={`px-2 py-1 rounded text-[10px] font-bold border transition-all ${
+                                        currentRating === col
+                                          ? "bg-brand-teal border-brand-teal text-white shadow-sm"
+                                          : "bg-white border-slate-200 text-slate-400 hover:border-slate-300"
+                                      }`}
+                                    >
+                                      {col}
+                                    </button>
+                                  ))}
+                                </motion.div>
+                              )}
+                            </div>
+                            {subOption === "Other" && isChecked && (
+                              <div className="px-3 pb-2 w-full">
+                                <input
+                                  type="text"
+                                  value={optionDetails[`${option}_other`] || ""}
+                                  onChange={(e) => onOptionDetailChange?.(`${option}_other`, e.target.value)}
+                                  className="w-full px-3 py-1.5 text-sm rounded-lg border border-slate-200 focus:ring-2 focus:ring-brand-teal focus:border-transparent outline-none transition-all"
+                                  placeholder="Please specify..."
+                                  autoFocus
+                                />
                               </div>
-                              <span className="leading-tight font-medium">{subOption}</span>
-                            </label>
-
-                            {isChecked && question.rateSubOptions && (
-                              <motion.div 
-                                initial={{ opacity: 0, y: -5 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="flex flex-wrap gap-1 pl-7 pb-1"
-                              >
-                                {(question.columns || ["NA", "1", "2", "3", "4"]).map((col) => (
-                                  <button
-                                    key={col}
-                                    type="button"
-                                    onClick={() => {
-                                      onOptionDetailChange?.(`${option}_ratings`, {
-                                        ...ratings,
-                                        [subOption]: col
-                                      });
-                                    }}
-                                    className={`px-2 py-1 rounded text-[10px] font-bold border transition-all ${
-                                      currentRating === col
-                                        ? "bg-brand-teal border-brand-teal text-white shadow-sm"
-                                        : "bg-white border-slate-200 text-slate-400 hover:border-slate-300"
-                                    }`}
-                                  >
-                                    {col}
-                                  </button>
-                                ))}
-                              </motion.div>
                             )}
                           </div>
-                          {subOption === "Other" && isChecked && (
-                            <div className="px-3 pb-2">
-                              <input
-                                type="text"
-                                value={optionDetails[`${option}_other`] || ""}
-                                onChange={(e) => onOptionDetailChange?.(`${option}_other`, e.target.value)}
-                                className="w-full px-3 py-1.5 text-sm rounded-lg border border-slate-200 focus:ring-2 focus:ring-brand-teal focus:border-transparent outline-none transition-all"
-                                placeholder="Please specify..."
-                                autoFocus
-                              />
-                            </div>
-                          )}
-                        </React.Fragment>
-                      );
+                        );
                     })}
                   </div>
                 </motion.div>
@@ -456,7 +458,7 @@ export function QuestionRenderer({
                             <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
                               Select specific {row.toLowerCase()} tools used:
                             </p>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <div className="grid grid-cols-1 gap-2">
                               {question.rowsWithCheckboxes[row].map((subOption) => {
                                 const subValues = Array.isArray(optionDetails[row]) ? optionDetails[row] : [];
                                 const isChecked = subValues.includes(subOption);
@@ -465,65 +467,69 @@ export function QuestionRenderer({
                                 
                                 return (
                                   <div key={subOption} className="space-y-2">
-                                    <label 
-                                      className={`flex items-center p-2 rounded-lg border cursor-pointer transition-all text-sm ${
+                                    <div 
+                                      className={`flex flex-col sm:flex-row sm:items-center gap-3 p-2 rounded-lg border transition-all ${
                                         isChecked 
-                                          ? "border-brand-teal bg-brand-teal/5 text-brand-teal" 
+                                          ? "border-brand-teal bg-brand-teal/5" 
                                           : "border-slate-200 bg-white hover:border-slate-300"
                                       }`}
                                     >
-                                      <input
-                                        type="checkbox"
-                                        checked={isChecked}
-                                        onChange={() => {
-                                          const nextValues = isChecked
-                                            ? subValues.filter((v: string) => v !== subOption)
-                                            : [...subValues, subOption];
-                                          onOptionDetailChange?.(row, nextValues);
+                                      <label className="flex items-center cursor-pointer flex-1 min-w-0">
+                                        <input
+                                          type="checkbox"
+                                          checked={isChecked}
+                                          onChange={() => {
+                                            const nextValues = isChecked
+                                              ? subValues.filter((v: string) => v !== subOption)
+                                              : [...subValues, subOption];
+                                            onOptionDetailChange?.(row, nextValues);
 
-                                          if (isChecked) {
-                                            const nextRatings = { ...ratings };
-                                            delete nextRatings[subOption];
-                                            onOptionDetailChange?.(`${row}_ratings`, nextRatings);
-                                          }
-                                        }}
-                                        className="hidden"
-                                      />
-                                      <div className={`w-4 h-4 rounded border flex items-center justify-center mr-2 ${
-                                        isChecked ? "bg-brand-teal border-brand-teal" : "border-slate-300"
-                                      }`}>
-                                        {isChecked && <Check className="w-3 h-3 text-white" />}
-                                      </div>
-                                      <span className="truncate font-medium">{subOption}</span>
-                                    </label>
+                                            if (isChecked) {
+                                              const nextRatings = { ...ratings };
+                                              delete nextRatings[subOption];
+                                              onOptionDetailChange?.(`${row}_ratings`, nextRatings);
+                                            }
+                                          }}
+                                          className="hidden"
+                                        />
+                                        <div className={`w-4 h-4 rounded border flex items-center justify-center mr-2 flex-shrink-0 ${
+                                          isChecked ? "bg-brand-teal border-brand-teal" : "border-slate-300"
+                                        }`}>
+                                          {isChecked && <Check className="w-3 h-3 text-white" />}
+                                        </div>
+                                        <span className={`truncate font-medium text-sm ${isChecked ? "text-brand-teal" : "text-slate-700"}`}>
+                                          {subOption}
+                                        </span>
+                                      </label>
 
-                                    {isChecked && question.rateSubOptions && (
-                                      <motion.div 
-                                        initial={{ opacity: 0, y: -5 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        className="flex flex-wrap gap-1 pl-6 pb-1"
-                                      >
-                                        {(question.columns || ["NA", "1", "2", "3", "4"]).map((col) => (
-                                          <button
-                                            key={col}
-                                            type="button"
-                                            onClick={() => {
-                                              onOptionDetailChange?.(`${row}_ratings`, {
-                                                ...ratings,
-                                                [subOption]: col
-                                              });
-                                            }}
-                                            className={`px-2 py-1 rounded text-[10px] font-bold border transition-all ${
-                                              currentRating === col
-                                                ? "bg-brand-teal border-brand-teal text-white shadow-sm"
-                                                : "bg-white border-slate-200 text-slate-400 hover:border-slate-300"
-                                            }`}
-                                          >
-                                            {col}
-                                          </button>
-                                        ))}
-                                      </motion.div>
-                                    )}
+                                      {isChecked && question.rateSubOptions && (
+                                        <motion.div 
+                                          initial={{ opacity: 0, x: 10 }}
+                                          animate={{ opacity: 1, x: 0 }}
+                                          className="flex flex-wrap gap-1"
+                                        >
+                                          {(question.columns || ["NA", "1", "2", "3", "4"]).map((col) => (
+                                            <button
+                                              key={col}
+                                              type="button"
+                                              onClick={() => {
+                                                onOptionDetailChange?.(`${row}_ratings`, {
+                                                  ...ratings,
+                                                  [subOption]: col
+                                                });
+                                              }}
+                                              className={`px-2 py-1 rounded text-[10px] font-bold border transition-all ${
+                                                currentRating === col
+                                                  ? "bg-brand-teal border-brand-teal text-white shadow-sm"
+                                                  : "bg-white border-slate-200 text-slate-400 hover:border-slate-300"
+                                              }`}
+                                            >
+                                              {col}
+                                            </button>
+                                          ))}
+                                        </motion.div>
+                                      )}
+                                    </div>
                                   </div>
                                 );
                               })}
