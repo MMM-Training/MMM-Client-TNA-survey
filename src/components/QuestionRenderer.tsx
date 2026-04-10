@@ -605,10 +605,15 @@ export function QuestionRenderer({
       <div>
         <label className="block text-lg font-semibold text-slate-900 mb-1 whitespace-pre-wrap">
           {question.label}
-          {question.required && <span className="text-red-500 ml-1">*</span>}
+          {question.required && question.type !== "grid" && <span className="text-red-500 ml-1">*</span>}
         </label>
         {question.description && (
           <p className="text-sm text-slate-500 mb-3 whitespace-pre-wrap">{question.description}</p>
+        )}
+        {question.type === "grid" && (
+          <p className="text-sm text-brand-teal font-medium mb-3 italic">
+            You are not required to complete all rows in the grid. Please select only the tools that apply to your experience or Only check the items that apply. You may leave the rest blank.
+          </p>
         )}
       </div>
       {renderInput()}

@@ -162,7 +162,10 @@ function SurveyApp() {
       const val = formData[q.id];
       
       if (q.required) {
-        if (val === undefined || val === "" || (Array.isArray(val) && val.length === 0)) {
+        const isEmpty = val === undefined || val === "" || (Array.isArray(val) && val.length === 0);
+        const isGridEmpty = q.type === "grid" && (val === undefined || Object.keys(val as Record<string, any>).length === 0);
+
+        if (isEmpty && !isGridEmpty) {
           newErrors[q.id] = "This field is required";
           isValid = false;
         } else if (q.type === "grid") {
@@ -190,36 +193,30 @@ function SurveyApp() {
             rows = allSelectedRows;
           }
 
-          const missingRows = rows.filter(row => !gridVal[row]);
-          if (missingRows && missingRows.length > 0) {
-            newErrors[q.id] = "Please complete all rows in the grid";
-            isValid = false;
-          } else {
-            // Check for required text input in grid rows
-            rows.forEach(row => {
-              if (row === "Other" || (q.rowsWithInputs?.includes(row))) {
-                const otherVal = row === "Other" ? formData[`${q.id}_other`] : (formData[`${q.id}_details`] as Record<string, string>)?.[row];
-                if (!otherVal || (otherVal as string).trim() === "") {
-                  newErrors[q.id] = `Please specify details for: ${row}`;
+          // Check for required text input in grid rows
+          rows.forEach(row => {
+            if (row === "Other" || (q.rowsWithInputs?.includes(row))) {
+              const otherVal = row === "Other" ? formData[`${q.id}_other`] : (formData[`${q.id}_details`] as Record<string, string>)?.[row];
+              if (gridVal[row] && (!otherVal || (otherVal as string).trim() === "")) {
+                newErrors[q.id] = `Please specify details for: ${row}`;
+                isValid = false;
+              }
+            }
+
+            // Check for sub-option ratings
+            if (q.rateSubOptions && q.rowsWithCheckboxes?.[row] && gridVal[row] && gridVal[row] !== "NA") {
+              const selectedSubOptions = (formData[`${q.id}_details`] as Record<string, any>)?.[row] as string[];
+              const ratings = (formData[`${q.id}_details`] as Record<string, any>)?.[`${row}_ratings`] as Record<string, string>;
+              
+              if (selectedSubOptions && selectedSubOptions.length > 0) {
+                const missingRatings = selectedSubOptions.filter(opt => !ratings?.[opt]);
+                if (missingRatings.length > 0) {
+                  newErrors[q.id] = `Please rate all selected tools for: ${row}`;
                   isValid = false;
                 }
               }
-
-              // Check for sub-option ratings
-              if (q.rateSubOptions && q.rowsWithCheckboxes?.[row] && gridVal[row] && gridVal[row] !== "NA") {
-                const selectedSubOptions = (formData[`${q.id}_details`] as Record<string, any>)?.[row] as string[];
-                const ratings = (formData[`${q.id}_details`] as Record<string, any>)?.[`${row}_ratings`] as Record<string, string>;
-                
-                if (selectedSubOptions && selectedSubOptions.length > 0) {
-                  const missingRatings = selectedSubOptions.filter(opt => !ratings?.[opt]);
-                  if (missingRatings.length > 0) {
-                    newErrors[q.id] = `Please rate all selected tools for: ${row}`;
-                    isValid = false;
-                  }
-                }
-              }
-            });
-          }
+            }
+          });
         } else if (val === "Other" || (Array.isArray(val) && val.includes("Other"))) {
           const otherVal = formData[`${q.id}_other`];
           if (!otherVal || (otherVal as string).trim() === "") {
