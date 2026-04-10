@@ -610,11 +610,6 @@ export function QuestionRenderer({
         {question.description && (
           <p className="text-sm text-slate-500 mb-3 whitespace-pre-wrap">{question.description}</p>
         )}
-        {question.type === "grid" && (
-          <p className="text-sm text-brand-teal font-medium mb-3 italic">
-            You are not required to complete all rows in the grid. Please select only the tools that apply to your experience or Only check the items that apply. You may leave the rest blank.
-          </p>
-        )}
       </div>
       {renderInput()}
       {error && <p className="text-sm text-red-500 mt-1 flex items-center gap-1">

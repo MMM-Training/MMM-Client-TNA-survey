@@ -2828,7 +2828,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "Billing Reports, Compliance & Process Improvement → Tracking KPIs, ensuring HIPAA compliance, and optimizing workflows"
             ],
             columns: ["NA", "1", "2", "3", "4"],
-            required: true,
+            required: false,
           },
           {
             id: "biller_crucial_tasks",
@@ -2895,7 +2895,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
             },
             columns: ["NA", "1", "2", "3", "4"],
             rateSubOptions: true,
-            required: true,
+            required: false,
           },
           {
             id: "biller_other_tools",
@@ -3042,7 +3042,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "Team coordination → Communicating with providers and staff"
             ],
             columns: ["NA", "1", "2", "3", "4"],
-            required: true,
+            required: false,
           },
           {
             id: "receptionist_crucial_tasks",
@@ -3112,7 +3112,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
             },
             columns: ["NA", "1", "2", "3", "4"],
             rateSubOptions: true,
-            required: true,
+            required: false,
           },
           {
             id: "receptionist_other_tools",
@@ -3259,7 +3259,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "Team coordination → Supporting internal workflow"
             ],
             columns: ["NA", "1", "2", "3", "4"],
-            required: true,
+            required: false,
           },
           {
             id: "admin_crucial_tasks",
@@ -3329,7 +3329,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
             },
             columns: ["NA", "1", "2", "3", "4"],
             rateSubOptions: true,
-            required: true,
+            required: false,
           },
           {
             id: "admin_other_tools",
@@ -3474,7 +3474,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "HIPAA & Documentation Standards → Ensuring privacy, accuracy, and provider-specific formatting"
             ],
             columns: ["NA", "1", "2", "3", "4"],
-            required: true,
+            required: false,
           },
           {
             id: "scribe_crucial_tasks",
@@ -3542,7 +3542,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
             },
             columns: ["NA", "1", "2", "3", "4"],
             rateSubOptions: true,
-            required: true,
+            required: false,
           },
           {
             id: "scribe_other_tools",
@@ -3753,7 +3753,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
             },
             columns: ["NA", "1", "2", "3", "4"],
             rateSubOptions: true,
-            required: true,
+            required: false,
           },
           {
             id: "health_educator_other_tools",
@@ -3967,7 +3967,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
             },
             columns: ["NA", "1", "2", "3", "4"],
             rateSubOptions: true,
-            required: true,
+            required: false,
           },
           {
             id: "dental_receptionist_other_tools",
@@ -4181,7 +4181,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
             },
             columns: ["NA", "1", "2", "3", "4"],
             rateSubOptions: true,
-            required: true,
+            required: false,
           },
           {
             id: "dental_biller_other_tools",
