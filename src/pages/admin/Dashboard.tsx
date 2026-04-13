@@ -76,6 +76,86 @@ const COLORS = [
   '#16a34a', // Green
 ];
 
+// Helper to extract summary from sections
+const extractSummary = (res: SurveyResponse) => {
+  if (res.summary) return res.summary;
+
+  let biggestChallenge = 'N/A';
+  let trainingNeeds: string[] = [];
+  let trainingMethods: string[] = [];
+
+  if (res.sections) {
+    Object.values(res.sections).forEach((section: any) => {
+      // Biggest Challenge
+      if (section.biggest_challenge) biggestChallenge = section.biggest_challenge;
+      else if (section.priority_role_reason) biggestChallenge = section.priority_role_reason;
+      else if (section.readiness_improvement_suggestions) biggestChallenge = section.readiness_improvement_suggestions;
+      else if (section.common_client_pain_points && Array.isArray(section.common_client_pain_points)) {
+        if (biggestChallenge === 'N/A') biggestChallenge = section.common_client_pain_points.join(', ');
+      }
+      
+      // Training Needs
+      const needsKeys = [
+        'role_specific_training_needs',
+        'micro_modules',
+        'biller_micro_modules',
+        'receptionist_micro_modules',
+        'admin_micro_modules',
+        'scribe_micro_modules',
+        'health_educator_micro_modules',
+        'dental_receptionist_micro_modules',
+        'dental_biller_micro_modules',
+        'ea_micro_modules',
+        'gb_micro_modules',
+        'biller_core_skills_upskill',
+        'biller_specialized_skills_upskill',
+        'receptionist_core_skills_upskill',
+        'receptionist_specialized_skills_upskill',
+        'admin_core_skills_upskill',
+        'admin_specialized_skills_upskill',
+        'scribe_core_skills_upskill',
+        'scribe_specialized_skills_upskill',
+        'health_educator_core_skills_upskill',
+        'health_educator_specialized_skills_upskill',
+        'dental_receptionist_core_skills_upskill',
+        'dental_receptionist_specialized_skills_upskill',
+        'dental_biller_core_skills_upskill',
+        'dental_biller_specialized_skills_upskill'
+      ];
+      
+      needsKeys.forEach(key => {
+        if (section[key]) {
+          if (Array.isArray(section[key])) {
+            trainingNeeds.push(...section[key]);
+          } else if (typeof section[key] === 'object') {
+             // Handle grid
+             Object.entries(section[key]).forEach(([row, val]) => {
+               if (val === 'High training priority' || val === 'Moderate training needed' || val === '4' || val === '3') {
+                 trainingNeeds.push(row.split('→')[0].trim());
+               }
+             });
+          }
+        }
+      });
+
+      // Training Methods
+      if (section.training_preference) {
+        if (Array.isArray(section.training_preference)) {
+          trainingMethods.push(...section.training_preference);
+        } else {
+          trainingMethods.push(section.training_preference);
+        }
+      }
+    });
+  }
+
+  return {
+    biggest_challenge: biggestChallenge,
+    top_training_needs: Array.from(new Set(trainingNeeds)).slice(0, 3),
+    preferred_training_method: Array.from(new Set(trainingMethods))
+  };
+};
+
 const AdminDashboard: React.FC = () => {
   const [responses, setResponses] = useState<SurveyResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -85,6 +165,12 @@ const AdminDashboard: React.FC = () => {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [selectedResponse, setSelectedResponse] = useState<SurveyResponse | null>(null);
+
+  const responseSummary = useMemo(() => {
+    if (!selectedResponse) return null;
+    return extractSummary(selectedResponse);
+  }, [selectedResponse]);
+
   const [isExporting, setIsExporting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -1738,6 +1824,50 @@ const AdminDashboard: React.FC = () => {
                     <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100">
                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Email</p>
                       <p className="text-slate-600 font-medium truncate" title={selectedResponse.email}>{selectedResponse.email}</p>
+                    </div>
+                  </div>
+
+                  {/* Summary Section */}
+                  <div className="bg-gradient-to-br from-indigo-600 to-blue-700 rounded-3xl p-6 text-white shadow-lg relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-6 opacity-10">
+                      <Zap className="w-24 h-24" />
+                    </div>
+                    <div className="relative z-10">
+                      <div className="flex items-center gap-2 mb-6">
+                        <Zap className="w-5 h-5 text-yellow-300 fill-yellow-300" />
+                        <h3 className="text-lg font-bold">Response Summary</h3>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="space-y-2">
+                          <p className="text-indigo-100 text-[10px] font-bold uppercase tracking-wider">Biggest Challenge</p>
+                          <p className="text-sm font-medium leading-relaxed line-clamp-3">
+                            {responseSummary?.biggest_challenge || 'No challenge specified'}
+                          </p>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <p className="text-indigo-100 text-[10px] font-bold uppercase tracking-wider">Top 3 Training Needs</p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {responseSummary?.top_training_needs.length ? responseSummary.top_training_needs.map((need, i) => (
+                              <span key={i} className="px-2 py-0.5 bg-white/10 backdrop-blur-md rounded-md text-[11px] font-medium border border-white/10">
+                                {need}
+                              </span>
+                            )) : <span className="text-indigo-200 text-xs italic">None identified</span>}
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <p className="text-indigo-100 text-[10px] font-bold uppercase tracking-wider">Preferred Methods</p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {responseSummary?.preferred_training_method.length ? responseSummary.preferred_training_method.map((method, i) => (
+                              <span key={i} className="px-2 py-0.5 bg-white/10 backdrop-blur-md rounded-md text-[11px] font-medium border border-white/10">
+                                {method}
+                              </span>
+                            )) : <span className="text-indigo-200 text-xs italic">None identified</span>}
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
