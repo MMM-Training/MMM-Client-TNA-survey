@@ -21,7 +21,7 @@ import {
   Download, Filter, Search, LogOut, LayoutDashboard, Database, 
   Users, Calendar, ChevronRight, FileText, TrendingUp, AlertCircle,
   ArrowUpRight, ArrowDownRight, Clock, ArrowLeft, X, Printer, Copy, Check, Zap, BarChart3, ClipboardList, Star,
-  Trash2, AlertTriangle, Sparkles, Bot
+  Trash2, AlertTriangle, Sparkles, Bot, ShieldCheck
 } from 'lucide-react';
 import { format, startOfWeek, startOfMonth, isWithinInterval, subDays } from 'date-fns';
 import { json2csv } from 'json-2-csv';
@@ -150,6 +150,18 @@ const extractSummary = (res: SurveyResponse) => {
           trainingMethods.push(section.training_preference);
         }
       }
+
+      // Part VI - Long Term Success
+      if (section.common_frustrations && Array.isArray(section.common_frustrations)) {
+        section.common_frustrations.forEach((f: string) => {
+          if (f !== 'No major frustrations') {
+            trainingNeeds.push(`Frustration: ${f}`);
+          }
+        });
+      }
+      if (section.va_retention_factors && Array.isArray(section.va_retention_factors)) {
+        trainingNeeds.push(...section.va_retention_factors.map((f: string) => `Retention: ${f}`));
+      }
     });
   }
 
@@ -158,6 +170,137 @@ const extractSummary = (res: SurveyResponse) => {
     top_training_needs: Array.from(new Set(trainingNeeds)).slice(0, 3),
     preferred_training_method: Array.from(new Set(trainingMethods))
   };
+};
+
+interface ResponseListViewProps {
+  responses: SurveyResponse[];
+  searchTerm: string;
+  roleFilter: string;
+  expFilter: string;
+  startDate: string;
+  endDate: string;
+  selectedResponse: SurveyResponse | null;
+  onSelect: (res: SurveyResponse) => void;
+  selectedIds: string[];
+  onToggleSelect: (id: string, e: React.MouseEvent) => void;
+  onDeleteIndividual: (id: string, e: React.MouseEvent) => void;
+}
+
+const ResponseListView: React.FC<ResponseListViewProps> = ({ 
+  responses, 
+  searchTerm, 
+  roleFilter, 
+  expFilter, 
+  startDate, 
+  endDate, 
+  selectedResponse, 
+  onSelect,
+  selectedIds,
+  onToggleSelect,
+  onDeleteIndividual
+}) => {
+  return (
+    <div className="space-y-4 p-6">
+      {responses.length === 0 ? (
+        <div className="py-20 text-center bg-white rounded-3xl border-2 border-dashed border-slate-100">
+          <div className="mx-auto h-16 w-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4">
+            <Search className="h-8 w-8 text-slate-300" />
+          </div>
+          <h4 className="text-slate-900 font-bold text-lg">No matching responses</h4>
+          <p className="text-slate-500 max-w-xs mx-auto">Try adjusting your search terms or filters to see more results.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-4">
+          {responses.map((res) => (
+            <motion.div
+              layout
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              key={res.id}
+              onClick={() => onSelect(res)}
+              className={cn(
+                "group relative bg-white rounded-2xl p-5 border transition-all cursor-pointer hover:shadow-xl hover:shadow-blue-900/5",
+                selectedResponse?.id === res.id 
+                  ? "border-blue-600 ring-1 ring-blue-600 shadow-md shadow-blue-50" 
+                  : "border-slate-100 hover:border-blue-200",
+                selectedIds.includes(res.id) && "bg-blue-50/30"
+              )}
+            >
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0 pt-1" onClick={(e) => onToggleSelect(res.id, e)}>
+                  <div className={cn(
+                    "w-5 h-5 rounded border-2 flex items-center justify-center transition-colors",
+                    selectedIds.includes(res.id) 
+                      ? "bg-blue-600 border-blue-600" 
+                      : "border-slate-200 group-hover:border-slate-300"
+                  )}>
+                    {selectedIds.includes(res.id) && <Check className="w-3.5 h-3.5 text-white" />}
+                  </div>
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <div>
+                      <h4 className="text-base font-bold text-slate-900 truncate group-hover:text-blue-600 transition-colors">
+                        {res.full_name}
+                      </h4>
+                      <p className="text-sm text-slate-500 truncate">{res.email}</p>
+                    </div>
+                    <div className="text-right flex flex-col items-end gap-1">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        {format(res.submitted_at.toDate(), 'MMM d, h:mm a')}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        {res.user_type === 'Medical Client / Business Client' && (
+                          <span className="px-2 py-0.5 bg-blue-50 text-blue-700 text-[10px] font-bold rounded uppercase border border-blue-100">
+                            Client
+                          </span>
+                        )}
+                        {res.user_type === 'Virtual Assistant' && (
+                          <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded uppercase border border-emerald-100">
+                            VA
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 pt-4 border-t border-slate-50">
+                    <div className="space-y-1">
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Role</p>
+                      <p className="text-xs font-semibold text-slate-700 truncate" title={res.role}>{res.role}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Industry</p>
+                      <p className="text-xs font-semibold text-slate-700">{res.practice_type || 'N/A'}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Exp. Level</p>
+                      <p className="text-xs font-semibold text-slate-700">{res.experience_years || 'N/A'}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <button
+                    onClick={(e) => onDeleteIndividual(res.id, e)}
+                    className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all opacity-0 group-hover:opacity-100"
+                    title="Delete Entry"
+                  >
+                    <Trash2 className="h-4.5 w-4.5" />
+                  </button>
+                  <div className="p-2 text-slate-300 opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0">
+                    <ChevronRight className="h-5 w-5" />
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 };
 
 const AdminDashboard: React.FC = () => {
@@ -554,8 +697,15 @@ const AdminDashboard: React.FC = () => {
         aggregateGenericSection('dental-biller-competencies-skills', ['dental_biller_core_skills_upskill', 'dental_biller_specialized_skills_upskill'], true),
         aggregateGenericSection('ea-competencies-skills', ['ea_core_skills_upskill', 'ea_specialized_skills_upskill'], true),
         aggregateGenericSection('gb-competencies-skills', ['gb_core_skills_upskill', 'gb_specialized_skills_upskill'], true),
+        aggregateGenericSection('part-vi-long-term-success', ['va_retention_factors'], true),
       ]).slice(0, 15),
       
+      longTermSuccess: {
+        frustrations: aggregateGenericSection('part-vi-long-term-success', 'common_frustrations', true),
+        upskilling: aggregateGenericSection('part-vi-long-term-success', 'upskilling_value', false),
+        retention: aggregateGenericSection('part-vi-long-term-success', 'va_retention_factors', true),
+      },
+
       systemRequirements: mergeAggregates([
         aggregateGenericSection('biller-tasks-workflow', ['biller_tool_proficiency'], false),
         aggregateGenericSection('receptionist-tasks-workflow', ['receptionist_tool_proficiency'], false),
@@ -753,6 +903,54 @@ const AdminDashboard: React.FC = () => {
 
     return results.filter(r => r.totalResponses > 0);
   }, [responses, analysisRole]);
+
+  const renderValue = (value: any) => {
+    if (value === undefined || value === null) return 'N/A';
+
+    if (Array.isArray(value)) {
+      return (
+        <div className="flex flex-wrap gap-2">
+          {value.map((v, i) => (
+            <span key={i} className="px-3 py-1 bg-white rounded-lg border border-slate-200 text-xs font-medium text-slate-700 shadow-sm">
+              {v}
+            </span>
+          ))}
+        </div>
+      );
+    }
+
+    if (typeof value === 'object' && !Array.isArray(value)) {
+      return (
+        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+          <table className="w-full text-xs text-left border-collapse">
+            <thead className="bg-slate-50 border-b border-slate-200">
+              <tr>
+                <th className="px-4 py-2 font-bold text-slate-500 uppercase tracking-wider">Field</th>
+                <th className="px-4 py-2 font-bold text-slate-500 uppercase tracking-wider text-center">Value</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {Object.entries(value).map(([row, col]: [string, any]) => (
+                <tr key={row} className="hover:bg-slate-50/50 transition-colors">
+                  <td className="px-4 py-2 font-medium text-slate-600">{row}</td>
+                  <td className="px-4 py-2 text-center">
+                    <span className={cn(
+                      "px-2 py-0.5 rounded-full font-bold",
+                      col === 'NA' ? "text-slate-400 bg-slate-100" : "text-blue-700 bg-blue-50"
+                    )}>
+                      {String(col)}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+    }
+
+    return <span className="font-medium text-slate-700">{String(value)}</span>;
+  };
 
   const handleExport = async () => {
     setIsExporting(true);
@@ -1201,6 +1399,19 @@ const AdminDashboard: React.FC = () => {
                 </div>
 
                 <div className="flex items-center gap-2 border-l border-gray-200 pl-3">
+                  <div className="flex items-center gap-2 px-3 py-2 bg-slate-50 rounded-lg border border-slate-200">
+                    <input 
+                      type="checkbox"
+                      id="select-all-responses"
+                      checked={filteredResponses.length > 0 && selectedResponseIds.length === filteredResponses.length}
+                      onChange={toggleSelectAll}
+                      className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                    />
+                    <label htmlFor="select-all-responses" className="text-xs font-bold text-slate-500 uppercase tracking-widest cursor-pointer select-none">
+                      Select All
+                    </label>
+                  </div>
+
                   {selectedResponseIds.length > 0 && (
                     <button
                       onClick={handleDeleteSelected}
@@ -1275,85 +1486,19 @@ const AdminDashboard: React.FC = () => {
               )}
             </AnimatePresence>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-gray-50/50">
-                    <th className="px-6 py-4 w-10">
-                      <input 
-                        type="checkbox"
-                        checked={filteredResponses.length > 0 && selectedResponseIds.length === filteredResponses.length}
-                        onChange={toggleSelectAll}
-                        className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
-                      />
-                    </th>
-                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Respondent</th>
-                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Role</th>
-                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Submitted</th>
-                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider"></th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {filteredResponses.map((res) => (
-                    <tr 
-                      key={res.id} 
-                      onClick={() => setSelectedResponse(res)}
-                      className={cn(
-                        "hover:bg-gray-50 cursor-pointer transition-colors group",
-                        selectedResponseIds.includes(res.id) && "bg-blue-50/30"
-                      )}
-                    >
-                      <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
-                        <input 
-                          type="checkbox"
-                          checked={selectedResponseIds.includes(res.id)}
-                          onChange={(e) => toggleSelectResponse(res.id, e as any)}
-                          className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
-                        />
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex flex-col">
-                          <span className="font-medium text-gray-900">{res.full_name}</span>
-                          <span className="text-sm text-gray-500">{res.email}</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="text-sm text-gray-600">
-                          {res.role}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-500">
-                        {format(res.submitted_at.toDate(), 'MMM d, yyyy HH:mm')}
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <button
-                            onClick={(e) => handleDeleteIndividual(res.id, e)}
-                            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
-                            title="Delete response"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                          <span className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">
-                            View <ChevronRight className="h-4 w-4" />
-                          </span>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              
-              {filteredResponses.length === 0 && (
-                <div className="p-12 text-center">
-                  <div className="mx-auto h-12 w-12 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                    <AlertCircle className="h-6 w-6 text-gray-400" />
-                  </div>
-                  <h4 className="text-gray-900 font-medium">No responses found</h4>
-                  <p className="text-gray-500 text-sm">Try adjusting your filters or search term.</p>
-                </div>
-              )}
-            </div>
+            <ResponseListView 
+              responses={filteredResponses}
+              searchTerm={searchTerm}
+              roleFilter={roleFilter}
+              expFilter={expFilter}
+              startDate={startDate}
+              endDate={endDate}
+              selectedResponse={selectedResponse}
+              onSelect={setSelectedResponse}
+              selectedIds={selectedResponseIds}
+              onToggleSelect={toggleSelectResponse}
+              onDeleteIndividual={handleDeleteIndividual}
+            />
           </div>
         )}
 
@@ -1698,6 +1843,58 @@ const AdminDashboard: React.FC = () => {
                   )}
                 </div>
               </div>
+
+              {/* Long-Term Success Insights */}
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 lg:col-span-2">
+                <div className="flex items-center gap-2 mb-6">
+                  <ShieldCheck className="h-5 w-5 text-emerald-500" />
+                  <h3 className="text-lg font-bold text-gray-900">Long-Term VA Success & Retention</h3>
+                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  <div>
+                    <h4 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4">Top VA Frustrations</h4>
+                    <div className="space-y-2">
+                      {roleReportData.longTermSuccess.frustrations.slice(0, 5).map((item, idx) => (
+                        <div key={idx} className="flex items-center justify-between p-3 bg-red-50/30 rounded-xl border border-red-100/50">
+                          <span className="text-xs font-medium text-red-900">{item.name}</span>
+                          <span className="text-xs font-bold text-red-600">{item.value} mentions</span>
+                        </div>
+                      ))}
+                      {roleReportData.longTermSuccess.frustrations.length === 0 && (
+                        <p className="text-xs text-slate-400 italic">No data yet.</p>
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4">Retention Factors</h4>
+                    <div className="space-y-2">
+                      {roleReportData.longTermSuccess.retention.slice(0, 5).map((item, idx) => (
+                        <div key={idx} className="flex items-center justify-between p-3 bg-emerald-50/30 rounded-xl border border-emerald-100/50">
+                          <span className="text-xs font-medium text-emerald-900">{item.name}</span>
+                          <span className="text-xs font-bold text-emerald-600">{item.value} votes</span>
+                        </div>
+                      ))}
+                      {roleReportData.longTermSuccess.retention.length === 0 && (
+                        <p className="text-xs text-slate-400 italic">No data yet.</p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="lg:col-span-2 pt-4 border-t border-slate-50">
+                    <h4 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-6">Value of Upskilling Programs</h4>
+                    <div className="h-48">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={roleReportData.longTermSuccess.upskilling}>
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                          <XAxis dataKey="name" tick={{ fontSize: 9 }} axisLine={false} tickLine={false} />
+                          <YAxis hide />
+                          <Tooltip />
+                          <Bar dataKey="value" fill="#10b981" radius={[4, 4, 0, 0]} barSize={40} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         )}
@@ -2033,10 +2230,10 @@ const AdminDashboard: React.FC = () => {
                                   }
 
                                   return (
-                                    <div key={key}>
-                                      <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">{questionLabel}</h4>
-                                      <div className="text-slate-700 bg-slate-50 p-4 rounded-xl border border-slate-100 text-sm">
-                                        {Array.isArray(value) ? value.join(', ') : typeof value === 'object' ? JSON.stringify(value) : String(value)}
+                                    <div key={key} className="space-y-2">
+                                      <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{questionLabel}</h4>
+                                      <div className="bg-slate-50/50 p-4 rounded-2xl border border-slate-100">
+                                        {renderValue(value)}
                                       </div>
                                     </div>
                                   );
