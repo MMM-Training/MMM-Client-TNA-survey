@@ -11,7 +11,10 @@ export type Role =
 
 export type SupportRole = "CDVO and OS" | "Sales and Placement";
 
-export type UserType = "Medical Client / Business Client";
+export type UserType = 
+  | "Medical Client / Business Client"
+  | "Virtual Assistant"
+  | "MMM Support";
 
 export type UserRole = "admin" | "responder";
 
@@ -36,6 +39,7 @@ export interface Question {
   rowsWithInputs?: string[]; // Grid rows that should trigger a text input
   rowsWithCheckboxes?: Record<string, string[]>; // Grid rows that should trigger a checkbox list
   columns?: string[]; // For grid
+  gridInstruction?: string; // Informational text for grid questions
   required?: boolean;
   maxSelections?: number;
   min?: number; // For scale
@@ -52,6 +56,7 @@ export interface Section {
   title: string;
   description?: string;
   questions: Question[];
+  role?: Role | string;
 }
 
 export interface SurveySchema {
@@ -71,6 +76,8 @@ export interface SupportSurveySchema {
 
 export interface FullSurveySchema {
   client: ClientSurveySchema;
+  va: SurveySchema;
+  support: SupportSurveySchema;
 }
 
 export interface SurveyResponse {

@@ -45,8 +45,6 @@ export function Onboarding({ onStart }: OnboardingProps) {
   const roles = [
     {
       type: "Medical Client / Business Client" as UserType,
-      title: "",
-      description: "",
       icons: [Stethoscope, BarChart3],
       color: "bg-blue-600",
       cta: "Start Client Survey"
@@ -129,16 +127,6 @@ export function Onboarding({ onStart }: OnboardingProps) {
                       />
                     ))}
                   </div>
-                  {role.title && (
-                    <div className="space-y-4">
-                      <h3 className="text-2xl font-black text-slate-900 group-hover:text-brand-teal transition-colors">{role.title}</h3>
-                      {role.description && (
-                        <p className="text-slate-500 leading-relaxed text-lg font-medium">
-                          {role.description}
-                        </p>
-                      )}
-                    </div>
-                  )}
                   <div className="mt-4 w-full">
                     <div className="w-full py-5 bg-brand-teal text-white rounded-2xl font-bold text-sm uppercase tracking-widest flex items-center justify-center gap-3 group-hover:bg-brand-teal/90 transition-all shadow-lg shadow-brand-teal/20 active:scale-95">
                       {role.cta}

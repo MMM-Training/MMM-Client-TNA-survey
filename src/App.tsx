@@ -123,7 +123,7 @@ function SurveyApp() {
 
     if (userType === "Medical Client / Business Client") {
       const selectedRoles = (formData.va_role_feedback as Role[]) || [];
-      const allSteps: (Section & { role?: Role })[] = [];
+      const allSteps: Section[] = [];
 
       // 1. Initial Info
       allSteps.push({ ...FULL_SURVEY_SCHEMA.client.initial });
@@ -147,6 +147,28 @@ function SurveyApp() {
       }
 
       return allSteps;
+    }
+
+    if (userType === "Virtual Assistant") {
+      const role = formData.role as Role;
+      if (!role) return [{ ...FULL_SURVEY_SCHEMA.va.profile }];
+      
+      const sections = FULL_SURVEY_SCHEMA.va.roleSections[role] || [];
+      return [
+        { ...FULL_SURVEY_SCHEMA.va.profile },
+        ...sections
+      ];
+    }
+
+    if (userType === "MMM Support") {
+      const role = formData.support_role as string;
+      if (!role) return [{ ...FULL_SURVEY_SCHEMA.support.initial }];
+      
+      const sections = FULL_SURVEY_SCHEMA.support.roleSections[role] || [];
+      return [
+        { ...FULL_SURVEY_SCHEMA.support.initial },
+        ...sections
+      ];
     }
 
     return [];
@@ -297,52 +319,79 @@ function SurveyApp() {
     setSubmitError(null);
     try {
       const sanitizedResponses = sanitizeData(formData);
-      const selectedRoles = (formData.va_role_feedback as Role[]) || [];
       
-      // We will submit one document per role
-      for (let i = 0; i < selectedRoles.length; i++) {
-        const role = selectedRoles[i];
-        const roleSections: Record<string, any> = {};
+      if (userType === "Medical Client / Business Client") {
+        const selectedRoles = (formData.va_role_feedback as Role[]) || [];
         
-        // Find which sections in 'steps' belong to this role, or are 'initial'
-        steps.forEach(step => {
-          const stepRole = (step as any).role;
-          if (step.id === "client-initial" || stepRole === role) {
-            const sectionData: Record<string, any> = {};
-            step.questions.forEach(q => {
-              if (sanitizedResponses[q.id] !== undefined) {
-                sectionData[q.id] = sanitizedResponses[q.id];
-                
-                const otherKey = `${q.id}_other`;
-                if (sanitizedResponses[otherKey] !== undefined) {
-                  sectionData[otherKey] = sanitizedResponses[otherKey];
-                }
+        // We will submit one document per role
+        for (let i = 0; i < selectedRoles.length; i++) {
+          const role = selectedRoles[i];
+          const roleSections: Record<string, any> = {};
+          
+          steps.forEach(step => {
+            const stepRole = (step as any).role;
+            if (step.id === "client-initial" || stepRole === role) {
+              const sectionData: Record<string, any> = {};
+              step.questions.forEach(q => {
+                if (sanitizedResponses[q.id] !== undefined) {
+                  sectionData[q.id] = sanitizedResponses[q.id];
+                  
+                  const otherKey = `${q.id}_other`;
+                  if (sanitizedResponses[otherKey] !== undefined) sectionData[otherKey] = sanitizedResponses[otherKey];
 
-                const detailsKey = `${q.id}_details`;
-                if (sanitizedResponses[detailsKey] !== undefined) {
-                  sectionData[detailsKey] = sanitizedResponses[detailsKey];
+                  const detailsKey = `${q.id}_details`;
+                  if (sanitizedResponses[detailsKey] !== undefined) sectionData[detailsKey] = sanitizedResponses[detailsKey];
                 }
+              });
+              if (Object.keys(sectionData).length > 0) {
+                roleSections[step.id] = sectionData;
               }
-            });
-            if (Object.keys(sectionData).length > 0) {
-              roleSections[step.id] = sectionData;
             }
+          });
+
+          const submission = {
+            user_type: userType,
+            full_name: (sanitizedResponses.full_name as string) || user?.displayName || "Client",
+            email: (sanitizedResponses.email as string) || user?.email || "no-email@provided.com",
+            roleByClient: role,
+            role: role,
+            practice_type: (sanitizedResponses.practice_type as string) || "N/A",
+            va_count: (sanitizedResponses.va_count as string) || "N/A",
+            sections: roleSections,
+            submitted_at: serverTimestamp(),
+            is_additional_role: i > 0
+          };
+
+          await addDoc(collection(db, "responses"), submission);
+        }
+      } else {
+        // Handle VA and Support (Single submission)
+        const roleSections: Record<string, any> = {};
+        steps.forEach(step => {
+          const sectionData: Record<string, any> = {};
+          step.questions.forEach(q => {
+            if (sanitizedResponses[q.id] !== undefined) {
+              sectionData[q.id] = sanitizedResponses[q.id];
+              const otherKey = `${q.id}_other`;
+              if (sanitizedResponses[otherKey] !== undefined) sectionData[otherKey] = sanitizedResponses[otherKey];
+              const detailsKey = `${q.id}_details`;
+              if (sanitizedResponses[detailsKey] !== undefined) sectionData[detailsKey] = sanitizedResponses[detailsKey];
+            }
+          });
+          if (Object.keys(sectionData).length > 0) {
+            roleSections[step.id] = sectionData;
           }
         });
 
         const submission = {
           user_type: userType,
-          full_name: user?.displayName || "Client",
+          full_name: (sanitizedResponses.full_name as string) || (sanitizedResponses.support_name as string) || user?.displayName || userType,
           email: (sanitizedResponses.email as string) || user?.email || "no-email@provided.com",
-          role: role,
-          practice_type: (sanitizedResponses.practice_type as string) || "N/A",
-          va_count: (sanitizedResponses.va_count as string) || "N/A",
+          role: (sanitizedResponses.role as string) || (sanitizedResponses.support_role as string) || "N/A",
           sections: roleSections,
           submitted_at: serverTimestamp(),
-          is_additional_role: i > 0
         };
 
-        console.log(`Submitting response for ${role}:`, submission);
         await addDoc(collection(db, "responses"), submission);
       }
       

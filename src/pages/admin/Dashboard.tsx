@@ -21,13 +21,16 @@ import {
   Download, Filter, Search, LogOut, LayoutDashboard, Database, 
   Users, Calendar, ChevronRight, FileText, TrendingUp, AlertCircle,
   ArrowUpRight, ArrowDownRight, Clock, ArrowLeft, X, Printer, Copy, Check, Zap, BarChart3, ClipboardList, Star,
-  Trash2, AlertTriangle
+  Trash2, AlertTriangle, Sparkles, Bot
 } from 'lucide-react';
 import { format, startOfWeek, startOfMonth, isWithinInterval, subDays } from 'date-fns';
 import { json2csv } from 'json-2-csv';
 import { motion, AnimatePresence } from 'framer-motion';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import Markdown from 'react-markdown';
+
+import { analyzeSurveyResponses } from '../../services/geminiService';
 
 import { 
   EXPERIENCE_OPTIONS,
@@ -107,20 +110,21 @@ const extractSummary = (res: SurveyResponse) => {
         'dental_biller_micro_modules',
         'ea_micro_modules',
         'gb_micro_modules',
-        'biller_core_skills_upskill',
-        'biller_specialized_skills_upskill',
-        'receptionist_core_skills_upskill',
-        'receptionist_specialized_skills_upskill',
-        'admin_core_skills_upskill',
-        'admin_specialized_skills_upskill',
-        'scribe_core_skills_upskill',
-        'scribe_specialized_skills_upskill',
-        'health_educator_core_skills_upskill',
-        'health_educator_specialized_skills_upskill',
-        'dental_receptionist_core_skills_upskill',
-        'dental_receptionist_specialized_skills_upskill',
-        'dental_biller_core_skills_upskill',
-        'dental_biller_specialized_skills_upskill'
+        'biller_targeted_skills_improvement',
+        'receptionist_targeted_skills_improvement',
+        'admin_targeted_skills_improvement',
+        'scribe_targeted_skills_improvement',
+        'health_educator_targeted_skills_improvement',
+        'dental_receptionist_targeted_skills_improvement',
+        'dental_biller_targeted_skills_improvement',
+        'ea_targeted_skills_improvement',
+        'gb_targeted_skills_improvement',
+        'common_gaps_post_placement',
+        'common_client_complaints',
+        'onboarding_challenges',
+        'cancellation_reasons',
+        'placement_challenges',
+        'placement_failure_reasons'
       ];
       
       needsKeys.forEach(key => {
@@ -251,6 +255,18 @@ const AdminDashboard: React.FC = () => {
   const [reportStartDate, setReportStartDate] = useState('');
   const [reportEndDate, setReportEndDate] = useState('');
   const [analysisRole, setAnalysisRole] = useState('All');
+
+  // AI Analysis State
+  const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+  const handleAiAnalysis = async () => {
+    setIsAnalyzing(true);
+    const summary = await analyzeSurveyResponses(filteredResponses);
+    setAiAnalysis(summary);
+    setIsAnalyzing(false);
+  };
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -261,9 +277,11 @@ const AdminDashboard: React.FC = () => {
         ...doc.data()
       })) as SurveyResponse[];
       
-      // Filter to only show Medical Client / Business Client responses
-      const medicalData = allData.filter(res => res.user_type === 'Medical Client / Business Client');
-      setResponses(medicalData);
+      // Filter to only show known user types
+      const validData = allData.filter(res => 
+        ['Medical Client / Business Client', 'Virtual Assistant', 'MMM Support'].includes(res.user_type)
+      );
+      setResponses(validData);
       setLoading(false);
     }, (error) => {
       console.error("Error fetching responses:", error);
@@ -366,7 +384,7 @@ const AdminDashboard: React.FC = () => {
 
   const topRole = useMemo(() => {
     if (roleChartData.length === 0) return 'N/A';
-    return [...roleChartData].sort((a, b) => b.value - a.value)[0]?.name || 'N/A';
+    return [...roleChartData].sort((a, b) => (b.value as number) - (a.value as number))[0]?.name || 'N/A';
   }, [roleChartData]);
 
   const getQuestionLabel = (category: string, userType: string, role: string) => {
@@ -1341,6 +1359,81 @@ const AdminDashboard: React.FC = () => {
 
         {activeTab === 'reports' && (
           <div className="space-y-8">
+            {/* AI Insights Section */}
+            <div className="bg-gradient-to-br from-brand-teal/5 to-blue-50/50 rounded-2xl p-8 border border-brand-teal/10 relative overflow-hidden group">
+              <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+                <Sparkles className="w-24 h-24 text-brand-teal" />
+              </div>
+              
+              <div className="relative z-10">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                       <h2 className="text-2xl font-bold text-gray-900">AI Data Insights</h2>
+                       <span className="flex items-center gap-1 bg-brand-teal/10 px-2 py-0.5 rounded text-[10px] font-extrabold text-brand-teal animate-pulse uppercase">
+                        <Sparkles className="w-2.5 h-2.5" />
+                        Beta
+                      </span>
+                    </div>
+                    <p className="text-gray-500 max-w-xl">
+                      Generate an AI-powered executive summary of the current filtered survey responses to identify performance trends and training gaps.
+                    </p>
+                  </div>
+                  
+                  <button
+                    onClick={handleAiAnalysis}
+                    disabled={isAnalyzing || filteredResponses.length === 0}
+                    className="flex items-center gap-2 px-6 py-3 bg-brand-teal text-white rounded-xl font-bold hover:bg-brand-teal/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-brand-teal/20 active:scale-95 shrink-0"
+                  >
+                    {isAnalyzing ? (
+                      <>
+                        <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        Analyzing Data...
+                      </>
+                    ) : (
+                      <>
+                        <Zap className="w-4 h-4" />
+                        Generate AI Summary
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {aiAnalysis ? (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-brand-teal/10 shadow-sm"
+                  >
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="font-bold text-brand-teal flex items-center gap-2">
+                        <Star className="w-4 h-4 fill-brand-teal" />
+                        Executive Summary
+                      </h4>
+                      <button 
+                         onClick={() => setAiAnalysis(null)}
+                         className="text-gray-400 hover:text-gray-600 p-1"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                    <div className="prose prose-sm max-w-none prose-slate prose-p:text-gray-600 prose-ul:text-gray-600">
+                      <Markdown>{aiAnalysis}</Markdown>
+                    </div>
+                  </motion.div>
+                ) : filteredResponses.length === 0 ? (
+                  <div className="text-center p-8 bg-gray-50/50 rounded-xl border border-dashed border-gray-200">
+                    <p className="text-gray-500 italic">No data available to analyze. Adjust filters to see more responses.</p>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3 p-4 bg-white/40 rounded-xl border border-dashed border-brand-teal/20 text-brand-teal/60">
+                    <Bot className="w-5 h-5" />
+                    <span className="text-sm font-medium italic">Ready to analyze {filteredResponses.length} responses...</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
               <div>
                 <h2 className="text-xl font-bold text-gray-900">Aggregate Analysis</h2>

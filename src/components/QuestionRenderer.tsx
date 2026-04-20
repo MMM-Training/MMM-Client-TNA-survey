@@ -67,27 +67,38 @@ export function QuestionRenderer({
                     name={question.id}
                     value={option}
                     checked={value === option}
-                    onChange={() => onChange(option)}
+                    onChange={() => {}} // Controlled component - handler moved to label click for deselection support
                     className="hidden"
                   />
                   <div
-                    className={`w-5 h-5 rounded-full border-2 mr-3 flex items-center justify-center transition-colors ${
-                      value === option ? "border-brand-teal" : "border-slate-300"
-                    }`}
+                    onClick={(e) => {
+                      // Prevent label from triggering onChange twice
+                      e.preventDefault();
+                      onChange(value === option ? undefined : option);
+                    }}
+                    className="flex items-center w-full"
                   >
-                    <AnimatePresence>
-                      {value === option && (
-                        <motion.div
-                          initial={{ scale: 0, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          exit={{ scale: 0, opacity: 0 }}
-                          transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                          className="w-2.5 h-2.5 bg-brand-teal rounded-full"
-                        />
-                      )}
-                    </AnimatePresence>
+                    <div
+                      className={`w-5 h-5 rounded-full border-2 mr-3 flex items-center justify-center transition-colors ${
+                        value === option ? "border-brand-teal" : "border-slate-300"
+                      }`}
+                    >
+                      <AnimatePresence>
+                        {value === option && (
+                          <motion.div
+                            initial={{ scale: 0, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0, opacity: 0 }}
+                            transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                            className="w-2.5 h-2.5 bg-brand-teal rounded-full"
+                          />
+                        )}
+                      </AnimatePresence>
+                    </div>
+                    <span className="font-medium">
+                      {option === "Other" && otherValue ? otherValue : option}
+                    </span>
                   </div>
-                  <span className="font-medium">{option}</span>
                 </label>
                 {((option === "Other" && value === "Other") || 
                   (question.optionsWithInputs?.includes(option) && value === option)) && (
@@ -168,7 +179,9 @@ export function QuestionRenderer({
                       )}
                     </AnimatePresence>
                   </div>
-                  <span className="font-medium">{option}</span>
+                  <span className="font-medium">
+                    {option === "Other" && otherValue ? otherValue : option}
+                  </span>
                 </label>
                 {((option === "Other" && currentValues.includes("Other")) || 
                   (question.optionsWithInputs?.includes(option) && currentValues.includes(option))) && (
@@ -208,6 +221,11 @@ export function QuestionRenderer({
                         
                         const ratings = (optionDetails[`${option}_ratings`] as Record<string, string>) || {};
                         const currentRating = ratings[subOption];
+
+                        const isOther = subOption === "Other";
+                        const displayLabel = isOther 
+                          ? (optionDetails[`${option}_other`] || "Other")
+                          : subOption;
                         
                         return (
                           <div key={subOption} className="space-y-2">
@@ -242,7 +260,7 @@ export function QuestionRenderer({
                                   {isChecked && <Check className="w-3 h-3 text-white" />}
                                 </div>
                                 <span className={`leading-tight font-medium text-sm ${isChecked ? "text-brand-teal" : "text-slate-700"}`}>
-                                  {subOption}
+                                  {displayLabel}
                                 </span>
                               </label>
 
@@ -253,21 +271,25 @@ export function QuestionRenderer({
                                   className="flex flex-wrap gap-1"
                                 >
                                   {(question.columns || ["NA", "1", "2", "3", "4"]).map((col) => (
-                                    <button
-                                      key={col}
-                                      type="button"
-                                      onClick={() => {
-                                        onOptionDetailChange?.(`${option}_ratings`, {
-                                          ...ratings,
-                                          [subOption]: col
-                                        });
-                                      }}
-                                      className={`px-2 py-1 rounded text-[10px] font-bold border transition-all ${
-                                        currentRating === col
-                                          ? "bg-brand-teal border-brand-teal text-white shadow-sm"
-                                          : "bg-white border-slate-200 text-slate-400 hover:border-slate-300"
-                                      }`}
-                                    >
+                                      <button
+                                        key={col}
+                                        type="button"
+                                        onClick={() => {
+                                          const nextCol = currentRating === col ? undefined : col;
+                                          const nextRatings = { ...ratings };
+                                          if (nextCol === undefined) {
+                                            delete nextRatings[subOption];
+                                          } else {
+                                            nextRatings[subOption] = nextCol;
+                                          }
+                                          onOptionDetailChange?.(`${option}_ratings`, nextRatings);
+                                        }}
+                                        className={`px-2 py-1 rounded text-[10px] font-bold border transition-all ${
+                                          currentRating === col
+                                            ? "bg-brand-teal border-brand-teal text-white shadow-sm"
+                                            : "bg-white border-slate-200 text-slate-400 hover:border-slate-300"
+                                        }`}
+                                      >
                                       {col}
                                     </button>
                                   ))}
@@ -318,7 +340,7 @@ export function QuestionRenderer({
                 <div key={num} className="flex-1 flex flex-col items-center gap-2">
                   <button
                     type="button"
-                    onClick={() => onChange(num)}
+                    onClick={() => onChange(value === num ? undefined : num)}
                     className={`w-full py-4 rounded-xl border font-bold transition-all ${
                       value === num
                         ? "border-brand-teal bg-brand-teal/5 text-brand-teal shadow-sm"
@@ -343,6 +365,16 @@ export function QuestionRenderer({
       case "grid":
         const gridValue = (value as Record<string, string>) || {};
         let rows = question.rows || [];
+        
+        // Filter based on practice type for tool proficiency grid
+        if (question.label.includes("How does your Virtual Assistant currently support you when using the following tools?")) {
+          const practiceType = fullResponse?.['practice_type'];
+          if (practiceType === "Dental") {
+            rows = rows.filter(row => row !== "Electronic Medical Record");
+          } else if (practiceType === "Medical") {
+            rows = rows.filter(row => row !== "Dental PMS");
+          }
+        }
         
         if (question.dynamicRowsFrom) {
           const sources = Array.isArray(question.dynamicRowsFrom) 
@@ -403,6 +435,8 @@ export function QuestionRenderer({
               <tbody>
                 {rows.map((row) => {
                   const hasSubOptions = !!(question.rowsWithCheckboxes?.[row] && question.rateSubOptions);
+                  const isOtherRow = row === "Other" || question.rowsWithInputs?.includes(row);
+                  const showCheckbox = hasSubOptions || isOtherRow;
                   const isSelected = !!gridValue[row] && gridValue[row] !== "NA";
 
                   return (
@@ -413,7 +447,7 @@ export function QuestionRenderer({
                       >
                         <div className="space-y-2">
                           <div className="flex items-center gap-3">
-                            {hasSubOptions && (
+                            {showCheckbox && (
                               <div 
                                 onClick={() => {
                                   onChange({
@@ -465,6 +499,11 @@ export function QuestionRenderer({
                                 const ratings = (optionDetails[`${row}_ratings`] as Record<string, string>) || {};
                                 const currentRating = ratings[subOption];
                                 
+                                const isOther = subOption === "Other";
+                                const displayLabel = isOther 
+                                  ? (row === "Other" ? (otherValue || "Other") : (optionDetails[`${row}_other`] || "Other"))
+                                  : subOption;
+
                                 return (
                                   <div key={subOption} className="space-y-2">
                                     <div 
@@ -498,7 +537,7 @@ export function QuestionRenderer({
                                           {isChecked && <Check className="w-3 h-3 text-white" />}
                                         </div>
                                         <span className={`truncate font-medium text-sm ${isChecked ? "text-brand-teal" : "text-slate-700"}`}>
-                                          {subOption}
+                                          {displayLabel}
                                         </span>
                                       </label>
 
@@ -513,10 +552,14 @@ export function QuestionRenderer({
                                               key={col}
                                               type="button"
                                               onClick={() => {
-                                                onOptionDetailChange?.(`${row}_ratings`, {
-                                                  ...ratings,
-                                                  [subOption]: col
-                                                });
+                                                const nextCol = currentRating === col ? undefined : col;
+                                                const nextRatings = { ...ratings };
+                                                if (nextCol === undefined) {
+                                                  delete nextRatings[subOption];
+                                                } else {
+                                                  nextRatings[subOption] = nextCol;
+                                                }
+                                                onOptionDetailChange?.(`${row}_ratings`, nextRatings);
                                               }}
                                               className={`px-2 py-1 rounded text-[10px] font-bold border transition-all ${
                                                 currentRating === col
@@ -549,44 +592,57 @@ export function QuestionRenderer({
                         )}
                       </div>
                     </td>
-                    {!hasSubOptions && question.columns?.map((col) => (
-                      <td key={col} className="p-4 border-b border-slate-100 text-center">
-                        <label className="inline-flex items-center justify-center w-full h-full cursor-pointer">
-                          <input
-                            type="radio"
-                            name={`${question.id}-${row}`}
-                            value={col}
-                            checked={gridValue[row] === col}
-                            onChange={() =>
-                              onChange({
-                                ...gridValue,
-                                [row]: col,
-                              })
-                            }
-                            className="hidden"
-                          />
-                          <div
-                            className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
-                              gridValue[row] === col
-                                ? "border-brand-teal bg-brand-teal/5"
-                                : "border-slate-300"
-                            }`}
-                          >
-                            <AnimatePresence>
-                              {gridValue[row] === col && (
-                                <motion.div
-                                  initial={{ scale: 0, opacity: 0 }}
-                                  animate={{ scale: 1, opacity: 1 }}
-                                  exit={{ scale: 0, opacity: 0 }}
-                                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                                  className="w-3 h-3 bg-brand-teal rounded-full"
-                                />
-                              )}
-                            </AnimatePresence>
-                          </div>
-                        </label>
-                      </td>
-                    ))}
+                    {!hasSubOptions && question.columns?.map((col) => {
+                      const isRowEnabled = !showCheckbox || isSelected;
+                      return (
+                        <td key={col} className="p-4 border-b border-slate-100 text-center">
+                          {isRowEnabled ? (
+                            <label className="inline-flex items-center justify-center w-full h-full cursor-pointer">
+                              <input
+                                type="radio"
+                                name={`${question.id}-${row}`}
+                                value={col}
+                                checked={gridValue[row] === col}
+                                onChange={() => {}} // Controlled component - handler moved to div click for deselection
+                                className="hidden"
+                              />
+                              <div
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  const nextVal = gridValue[row] === col ? undefined : col;
+                                  const nextGridValue = { ...gridValue };
+                                  if (nextVal === undefined) {
+                                    delete nextGridValue[row];
+                                  } else {
+                                    nextGridValue[row] = nextVal;
+                                  }
+                                  onChange(nextGridValue);
+                                }}
+                                className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
+                                  gridValue[row] === col
+                                    ? "border-brand-teal bg-brand-teal/5"
+                                    : "border-slate-300 shadow-inner"
+                                }`}
+                              >
+                                <AnimatePresence>
+                                  {gridValue[row] === col && (
+                                    <motion.div
+                                      initial={{ scale: 0, opacity: 0 }}
+                                      animate={{ scale: 1, opacity: 1 }}
+                                      exit={{ scale: 0, opacity: 0 }}
+                                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                                      className="w-3 h-3 bg-brand-teal rounded-full"
+                                    />
+                                  )}
+                                </AnimatePresence>
+                              </div>
+                            </label>
+                          ) : (
+                            <div className="w-6 h-6 rounded-full border border-slate-100 bg-slate-50/50 mx-auto opacity-40" />
+                          )}
+                        </td>
+                      );
+                    })}
                   </tr>
                 );
               })}
@@ -609,6 +665,11 @@ export function QuestionRenderer({
         </label>
         {question.description && (
           <p className="text-sm text-slate-500 mb-3 whitespace-pre-wrap">{question.description}</p>
+        )}
+        {question.gridInstruction && (
+          <p className="text-xs text-brand-teal/80 italic mb-3">
+            {question.gridInstruction}
+          </p>
         )}
       </div>
       {renderInput()}

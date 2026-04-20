@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from "motion/react";
-import { MessageSquare, X, Bot } from "lucide-react";
+import { MessageSquare, X, Bot, Sparkles } from "lucide-react";
 import { useState, useEffect } from "react";
+import { generateSurveyBotMessage } from "../services/geminiService";
 
 interface SurveyBotProps {
   stepIndex: number;
@@ -13,40 +14,57 @@ interface SurveyBotProps {
 export function SurveyBot({ stepIndex, totalSteps, sectionTitle, userType, role }: SurveyBotProps) {
   const [isOpen, setIsOpen] = useState(true);
   const [message, setMessage] = useState("");
+  const [isAiPowered, setIsAiPowered] = useState(false);
 
   useEffect(() => {
-    const getMessage = () => {
-      if (stepIndex === 0) {
-        return `Hi! I'm Survey Bot. I'll be guiding you through this ${userType || "survey"}. Let's start with some basic info!`;
+    const getMessage = async () => {
+      // Try AI first
+      const aiMessage = await generateSurveyBotMessage(stepIndex, totalSteps, sectionTitle, userType, role);
+      
+      if (aiMessage) {
+        setMessage(aiMessage);
+        setIsAiPowered(true);
+        setIsOpen(true);
+        return;
       }
 
-      const roleLabel = role?.includes(',') ? "VAs" : (role || "VA");
+      // Fallback to static logic
+      setIsAiPowered(false);
+      const getStaticMessage = () => {
+        if (stepIndex === 0) {
+          return `Hi! I'm Survey Bot. I'll be guiding you through this ${userType || "survey"}. Let's start with some basic info!`;
+        }
 
-      if (sectionTitle.toLowerCase().includes("tasks and workflow")) {
-        return `This section is crucial! We want to understand exactly what your ${roleLabel} does daily so we can optimize their training.`;
-      }
+        const roleLabel = role?.includes(',') ? "VAs" : (role || "VA");
 
-      if (sectionTitle.toLowerCase().includes("competencies")) {
-        return `Great progress! Now, let's look at specific skills. This helps us identify where upskilling will have the biggest impact.`;
-      }
+        if (sectionTitle.toLowerCase().includes("tasks and workflow")) {
+          return `This section is crucial! We want to understand exactly what your ${roleLabel} does daily so we can optimize their training.`;
+        }
 
-      if (sectionTitle.toLowerCase().includes("communication")) {
-        return `Communication is key to a successful partnership. Tell us how your ${roleLabel} is doing in this area.`;
-      }
+        if (sectionTitle.toLowerCase().includes("competencies")) {
+          return `Great progress! Now, let's look at specific skills. This helps us identify where upskilling will have the biggest impact.`;
+        }
 
-      if (sectionTitle.toLowerCase().includes("ai essentials")) {
-        return `Almost there! We're excited about AI. Let us know how you see AI supporting your workflow.`;
-      }
+        if (sectionTitle.toLowerCase().includes("communication")) {
+          return `Communication is key to a successful partnership. Tell us how your ${roleLabel} is doing in this area.`;
+        }
 
-      if (stepIndex === totalSteps - 1) {
-        return "Last step! Thank you for your time. Your feedback is incredibly valuable to us.";
-      }
+        if (sectionTitle.toLowerCase().includes("ai essentials")) {
+          return `Almost there! We're excited about AI. Let us know how you see AI supporting your workflow.`;
+        }
 
-      return `You're doing great! We're on section ${stepIndex + 1} of ${totalSteps}.`;
+        if (stepIndex === totalSteps - 1) {
+          return "Last step! Thank you for your time. Your feedback is incredibly valuable to us.";
+        }
+
+        return `You're doing great! We're on section ${stepIndex + 1} of ${totalSteps}.`;
+      };
+
+      setMessage(getStaticMessage());
+      setIsOpen(true);
     };
 
-    setMessage(getMessage());
-    setIsOpen(true);
+    getMessage();
   }, [stepIndex, sectionTitle, userType, role, totalSteps]);
 
   return (
@@ -71,7 +89,15 @@ export function SurveyBot({ stepIndex, totalSteps, sectionTitle, userType, role 
                 <Bot className="w-6 h-6 text-brand-teal" />
               </div>
               <div className="space-y-1 pr-4">
-                <p className="text-[10px] font-bold text-brand-teal uppercase tracking-widest">Survey Bot</p>
+                <div className="flex items-center gap-1.5">
+                  <p className="text-[10px] font-bold text-brand-teal uppercase tracking-widest">Survey Bot</p>
+                  {isAiPowered && (
+                    <div className="flex items-center gap-0.5 bg-brand-teal/10 px-1 rounded text-[8px] font-extrabold text-brand-teal animate-pulse uppercase">
+                      <Sparkles className="w-2 h-2" />
+                      AI
+                    </div>
+                  )}
+                </div>
                 <p className="text-sm text-slate-600 leading-relaxed font-medium">
                   {message}
                 </p>

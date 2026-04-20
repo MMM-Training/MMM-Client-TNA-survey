@@ -54,6 +54,7 @@ const MICRO_MODULES_BY_ROLE: Record<string, string[]> = {
     "Insurance Verification & Benefits Breakdown",
     "Patient Financial Communication & Billing Inquiries (OOP, Copay, Estimates)",
     "EMR/EHR Navigation, Workflow Efficiency & Referral/Authorization Coordination",
+    "Other",
   ],
   "Medical Admin": [
     "Inbox, Email & Communication Management (prioritization, routing, professional written communication)",
@@ -62,6 +63,7 @@ const MICRO_MODULES_BY_ROLE: Record<string, string[]> = {
     "Task Management, Follow-Ups & Provider Workflow Support (pre-visit prep, task queues)",
     "Insurance Verification, Prior Authorizations & Referral Coordination",
     "Billing Support & Form Processing (copays, statements, patient inquiries, FMLA/disability forms)",
+    "Other",
   ],
   "Medical Biller": [
     "Charge Entry, Coding Accuracy & Documentation Review (CPT, ICD-10, modifiers)",
@@ -70,6 +72,7 @@ const MICRO_MODULES_BY_ROLE: Record<string, string[]> = {
     "AR Follow-Up, Aging Management & Recovery Strategies (30–90+ days, prioritization)",
     "Denial Management & Appeals (identification, resolution, advanced handling)",
     "Insurance, Authorizations & Billing Communication (eligibility for billing, prior auths, patient billing)",
+    "Other",
   ],
   "Medical Scribe": [
     "Live Scribing & Real-Time Documentation Accuracy (listening, speed, accuracy during encounters)",
@@ -78,6 +81,7 @@ const MICRO_MODULES_BY_ROLE: Record<string, string[]> = {
     "Pre-Charting & Post-Visit Documentation Workflow",
     "EMR/EHR Navigation, Templates & Documentation Tools",
     "Provider Communication, Workflow Support & Task Coordination",
+    "Other",
   ],
   "Health Educator": [
     "Patient Education & Health Coaching Communication (explaining concepts clearly, motivational support)",
@@ -86,6 +90,7 @@ const MICRO_MODULES_BY_ROLE: Record<string, string[]> = {
     "Patient Engagement, Follow-Ups & Behavior Change Support",
     "Documentation, Reporting & EMR/EHR Updates",
     "Program Coordination, Scheduling & Resource Support",
+    "Other",
   ],
   "Dental Receptionist": [
     "Call Handling & Patient Communication (includes new patient calls, confirmations, and difficult conversations)",
@@ -93,7 +98,8 @@ const MICRO_MODULES_BY_ROLE: Record<string, string[]> = {
     "Patient Intake, Chart Review & Documentation Accuracy (medical history, alerts, odontogram basics)",
     "Dental Insurance Verification & Benefits Breakdown (PPO, frequencies, limitations)",
     "Treatment Estimates, Billing & Patient Financial Communication (OOP, copay, payment plans)",
-    "Dental EMR Navigation & Workflow Management (Dentrix/Eaglesoft, scheduling, ledger, treatment planner)",
+    "Dental PMS Navigation & Workflow Management (Dentrix/Eaglesoft, scheduling, ledger, treatment planner)",
+    "Other",
   ],
   "Dental Biller": [
     "Charge Entry, CDT Coding & Documentation Accuracy",
@@ -102,6 +108,7 @@ const MICRO_MODULES_BY_ROLE: Record<string, string[]> = {
     "AR Follow-Up, Aging Management & Collections (outstanding claims, patient balances)",
     "Denial Management, Appeals & Insurance Follow-Ups",
     "Insurance Verification, Treatment Estimates & Patient Billing Communication (benefits, frequencies, OOP)",
+    "Other",
   ],
   "Executive Assistant VA": [
     "Inbox & Executive Communication Management (email prioritization, drafting, stakeholder communication)",
@@ -110,6 +117,7 @@ const MICRO_MODULES_BY_ROLE: Record<string, string[]> = {
     "Meeting Coordination, Minutes & Documentation Preparation",
     "Document Creation, File Management & Reporting Support (presentations, reports, organization)",
     "Research, Data Gathering & Business Support Tasks",
+    "Other",
   ],
   "General Business VA": [
     "Lead Generation, Research & CRM Management (prospecting, data entry, pipeline tracking)",
@@ -118,6 +126,7 @@ const MICRO_MODULES_BY_ROLE: Record<string, string[]> = {
     "Order Processing, Logistics & Vendor Coordination (orders, shipments, inventory, suppliers)",
     "Marketing Support & Content Coordination (social media, email campaigns, basic analytics)",
     "Administrative Support, Reporting & Workflow Management",
+    "Other",
   ],
 };
 
@@ -135,6 +144,107 @@ const getCompetenciesSection = (rolePrefix: string): Section => ({
       required: true,
     },
   ],
+});
+
+const getLongTermSuccessSection = (roleId: string): Section => ({
+  id: `${roleId}-long-term-success`,
+  title: "Part VI - Long-Term VA Success",
+  questions: [
+    {
+      id: `${roleId}_common_frustrations`,
+      type: "checkbox",
+      label: "What are the most common frustrations you experience when working with VAs in general?\n(Select up to 3)",
+      options: [
+        "Lack of initiative or proactiveness",
+        "Communication gaps or misunderstandings",
+        "Inconsistent quality of work",
+        "Slow turnaround time",
+        "Need for frequent supervision or reminders",
+        "Difficulty adapting to my workflow or tools",
+        "Limited problem-solving ability",
+        "Lack of long-term ownership of tasks",
+        "No major frustrations",
+        "Other"
+      ],
+      optionsWithInputs: ["Other"],
+      maxSelections: 3,
+      required: true,
+    },
+    {
+      id: `${roleId}_upskilling_value`,
+      type: "radio",
+      label: "If we offered a structured upskilling program for your VA, how valuable would this be for you?\n(Select one)",
+      options: [
+        "Extremely valuable – I would strongly encourage my VA to participate",
+        "Valuable – I would support it if it aligns with my VA’s role",
+        "Somewhat valuable – Depends on the content and time commitment",
+        "Not very valuable – I prefer my VA to focus only on daily work tasks",
+        "Not valuable at all – I don’t see the need for additional training"
+      ],
+      required: true,
+    },
+    {
+      id: `${roleId}_training_time_commitment`,
+      type: "radio",
+      label: "How much time per week would you realistically be comfortable with your VA dedicating to training or upskilling?\n(Select one)",
+      options: [
+        "Less than 1 hour per week",
+        "1–2 hours per week",
+        "2–3 hours per week",
+        "3–5 hours per week",
+        "Only during slower periods or when workload allows",
+        "I would prefer no dedicated training time"
+      ],
+      required: true,
+    },
+    {
+      id: `${roleId}_visibility_preference`,
+      type: "radio",
+      label: "Would you want visibility into your VA’s learning progress if they participate in an upskilling program?\n(Select one)",
+      options: [
+        "Yes – I would like regular updates or progress reports",
+        "Yes – but only high-level summaries",
+        "Maybe – only if it directly impacts performance",
+        "No – I trust the process and don’t need updates"
+      ],
+      required: true,
+    },
+    {
+      id: `${roleId}_program_success_criteria`,
+      type: "checkbox",
+      label: "What would need to happen for you to say that a VA upskilling program was truly worth it?\n(Select all that apply)",
+      options: [
+        "My VA becomes more proactive and independent",
+        "My VA completes tasks faster and more accurately",
+        "My VA requires less supervision",
+        "My VA can take on more complex responsibilities",
+        "My VA communicates more confidently and professionally",
+        "My VA understands my workflow better",
+        "My VA can suggest improvements or solutions",
+        "Other"
+      ],
+      optionsWithInputs: ["Other"],
+      required: true,
+    },
+    {
+      id: `${roleId}_retention_factors`,
+      type: "checkbox",
+      label: "What would make you want to keep a VA for 3–5 years instead of 1–2 years?\n(Select up to 3)",
+      options: [
+        "Consistently reliable and accurate work",
+        "Strong communication and professionalism",
+        "Proactive problem-solving and initiative",
+        "Deep understanding of my business or workflow",
+        "Ability to grow into more complex responsibilities",
+        "Trust and strong working relationship",
+        "Ability to manage tasks with minimal supervision",
+        "Other"
+      ],
+      optionsWithInputs: ["Other"],
+      maxSelections: 3,
+      required: true,
+    }
+  ]
 });
 
 const getMedicalReceptionistSections = (): Section[] => {
@@ -2760,6 +2870,12 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
     description: "Dear Client, \n\nWe’re excited to announce that we’re designing a VA Upskilling Program to help your VAs grow, become more confident, and deliver even more impact for your business!\n\nWe’d love your feedback to make sure the program hits the mark and focuses on what truly matters for your team.\n\nBy sharing your insights, you’ll help us:\n• Tailor task-specific training to your workflows\n• Identify the skills that matter most for your team’s success\n• Empower your VAs to be ready, confident, and fully supported\n\nYour input is key — together, we can equip your VAs to thrive and deliver their best every day!\n\nThis will take about 3–5 minutes to complete.\n\nThank you!",
     questions: [
       {
+        id: "full_name",
+        type: "text",
+        label: "Full Name (First Name, Last Name)*",
+        required: true,
+      },
+      {
         id: "email",
         type: "text",
         label: "Email Address",
@@ -2800,7 +2916,9 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
           "Dental Biller",
           "Executive Assistant VA",
           "General Business VA",
+          "Other",
         ],
+        optionsWithInputs: ["Other"],
         required: true,
       },
     ],
@@ -2854,10 +2972,12 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
             type: "grid",
             label: "How does your Virtual Assistant currently support you when using the following tools?",
             description: "Legend:\nNA – Not applicable: This tool is not part of your VA’s responsibilities\n1 – Guided: Performs tasks with guidance or direction\n2 – Assisted: Performs tasks with occasional guidance\n3 – Independent: Performs tasks independently in most cases\n4 – Advanced: Performs complex tasks independently",
+            gridInstruction: "You are not required to complete all rows in the grid. Please select only the tools that apply to your experience or only check the items that apply. You may leave the rest blank.",
             rows: [
               "Electronic Medical Record",
-              "Dental EMR",
-              "Insurance & Eligibility Tools"
+              "Dental PMS",
+              "Insurance & Eligibility Tools",
+              "Other"
             ],
             rowsWithCheckboxes: {
               "Electronic Medical Record": [
@@ -2875,7 +2995,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
                 "Allscripts",
                 "Other"
               ],
-              "Dental EMR": [
+              "Dental PMS": [
                 "Dentrix",
                 "Eaglesoft",
                 "Open Dental",
@@ -2893,6 +3013,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
                 "Other"
               ]
             },
+            rowsWithInputs: ["Other"],
             columns: ["NA", "1", "2", "3", "4"],
             rateSubOptions: true,
             required: false,
@@ -3018,6 +3139,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
           }
         ],
       },
+      getLongTermSuccessSection("biller"),
     ],
     "Medical Receptionist": [
       {
@@ -3071,10 +3193,12 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
             type: "grid",
             label: "How does your Virtual Assistant currently support you when using the following tools?",
             description: "Legend:\nNA – Not applicable: This tool is not part of your VA’s responsibilities\n1 – Guided: Performs tasks with guidance or direction\n2 – Assisted: Performs tasks with occasional guidance\n3 – Independent: Performs tasks independently in most cases\n4 – Advanced: Performs complex tasks independently",
+            gridInstruction: "You are not required to complete all rows in the grid. Please select only the tools that apply to your experience or only check the items that apply. You may leave the rest blank.",
             rows: [
               "Electronic Medical Record",
-              "Dental EMR",
-              "Insurance & Eligibility Tools"
+              "Dental PMS",
+              "Insurance & Eligibility Tools",
+              "Other"
             ],
             rowsWithCheckboxes: {
               "Electronic Medical Record": [
@@ -3092,7 +3216,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
                 "Allscripts",
                 "Other"
               ],
-              "Dental EMR": [
+              "Dental PMS": [
                 "Dentrix",
                 "Eaglesoft",
                 "Open Dental",
@@ -3110,6 +3234,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
                 "Other"
               ]
             },
+            rowsWithInputs: ["Other"],
             columns: ["NA", "1", "2", "3", "4"],
             rateSubOptions: true,
             required: false,
@@ -3235,6 +3360,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
           }
         ],
       },
+      getLongTermSuccessSection("receptionist"),
     ],
     "Medical Administrative Assistant": [
       {
@@ -3288,10 +3414,12 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
             type: "grid",
             label: "How does your Virtual Assistant currently support you when using the following tools?",
             description: "Legend:\nNA – Not applicable: This tool is not part of your VA’s responsibilities\n1 – Guided: Performs tasks with guidance or direction\n2 – Assisted: Performs tasks with occasional guidance\n3 – Independent: Performs tasks independently in most cases\n4 – Advanced: Performs complex tasks independently",
+            gridInstruction: "You are not required to complete all rows in the grid. Please select only the tools that apply to your experience or only check the items that apply. You may leave the rest blank.",
             rows: [
               "Electronic Medical Record",
-              "Dental EMR",
-              "Insurance & Eligibility Tools"
+              "Dental PMS",
+              "Insurance & Eligibility Tools",
+              "Other"
             ],
             rowsWithCheckboxes: {
               "Electronic Medical Record": [
@@ -3309,7 +3437,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
                 "Allscripts",
                 "Other"
               ],
-              "Dental EMR": [
+              "Dental PMS": [
                 "Dentrix",
                 "Eaglesoft",
                 "Open Dental",
@@ -3327,6 +3455,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
                 "Other"
               ]
             },
+            rowsWithInputs: ["Other"],
             columns: ["NA", "1", "2", "3", "4"],
             rateSubOptions: true,
             required: false,
@@ -3452,6 +3581,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
           }
         ],
       },
+      getLongTermSuccessSection("admin"),
     ],
     "Medical Scribe": [
       {
@@ -3501,10 +3631,12 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
             type: "grid",
             label: "How does your Virtual Assistant currently support you when using the following tools?",
             description: "Legend:\nNA – Not applicable: This tool is not part of your VA’s responsibilities\n1 – Guided: Performs tasks with guidance or direction\n2 – Assisted: Performs tasks with occasional guidance\n3 – Independent: Performs tasks independently in most cases\n4 – Advanced: Performs complex tasks independently",
+            gridInstruction: "You are not required to complete all rows in the grid. Please select only the tools that apply to your experience or only check the items that apply. You may leave the rest blank.",
             rows: [
               "Electronic Medical Record",
-              "Dental EMR",
-              "Insurance & Eligibility Tools"
+              "Dental PMS",
+              "Insurance & Eligibility Tools",
+              "Other"
             ],
             rowsWithCheckboxes: {
               "Electronic Medical Record": [
@@ -3522,7 +3654,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
                 "Allscripts",
                 "Other"
               ],
-              "Dental EMR": [
+              "Dental PMS": [
                 "Dentrix",
                 "Eaglesoft",
                 "Open Dental",
@@ -3540,6 +3672,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
                 "Other"
               ]
             },
+            rowsWithInputs: ["Other"],
             columns: ["NA", "1", "2", "3", "4"],
             rateSubOptions: true,
             required: false,
@@ -3665,6 +3798,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
           }
         ],
       },
+      getLongTermSuccessSection("scribe"),
     ],
     "Health Educator": [
       {
@@ -3712,10 +3846,12 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
             type: "grid",
             label: "How does your Virtual Assistant currently support you when using the following tools?",
             description: "Legend:\nNA – Not applicable: This tool is not part of your VA’s responsibilities\n1 – Guided: Performs tasks with guidance or direction\n2 – Assisted: Performs tasks with occasional guidance\n3 – Independent: Performs tasks independently in most cases\n4 – Advanced: Performs complex tasks independently",
+            gridInstruction: "You are not required to complete all rows in the grid. Please select only the tools that apply to your experience or only check the items that apply. You may leave the rest blank.",
             rows: [
               "Electronic Medical Record",
-              "Dental EMR",
-              "Insurance & Eligibility Tools"
+              "Dental PMS",
+              "Insurance & Eligibility Tools",
+              "Other"
             ],
             rowsWithCheckboxes: {
               "Electronic Medical Record": [
@@ -3733,7 +3869,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
                 "Allscripts",
                 "Other"
               ],
-              "Dental EMR": [
+              "Dental PMS": [
                 "Dentrix",
                 "Eaglesoft",
                 "Open Dental",
@@ -3751,6 +3887,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
                 "Other"
               ]
             },
+            rowsWithInputs: ["Other"],
             columns: ["NA", "1", "2", "3", "4"],
             rateSubOptions: true,
             required: false,
@@ -3876,6 +4013,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
           }
         ],
       },
+      getLongTermSuccessSection("educator"),
     ],
     "Dental Receptionist": [
       {
@@ -3926,10 +4064,12 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
             type: "grid",
             label: "How does your Virtual Assistant currently support you when using the following tools?",
             description: "Legend:\nNA – Not applicable: This tool is not part of your VA’s responsibilities\n1 – Guided: Performs tasks with guidance or direction\n2 – Assisted: Performs tasks with occasional guidance\n3 – Independent: Performs tasks independently in most cases\n4 – Advanced: Performs complex tasks independently",
+            gridInstruction: "You are not required to complete all rows in the grid. Please select only the tools that apply to your experience or only check the items that apply. You may leave the rest blank.",
             rows: [
               "Electronic Medical Record",
-              "Dental EMR",
-              "Insurance & Eligibility Tools"
+              "Dental PMS",
+              "Insurance & Eligibility Tools",
+              "Other"
             ],
             rowsWithCheckboxes: {
               "Electronic Medical Record": [
@@ -3947,7 +4087,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
                 "Allscripts",
                 "Other"
               ],
-              "Dental EMR": [
+              "Dental PMS": [
                 "Dentrix",
                 "Eaglesoft",
                 "Open Dental",
@@ -3965,6 +4105,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
                 "Other"
               ]
             },
+            rowsWithInputs: ["Other"],
             columns: ["NA", "1", "2", "3", "4"],
             rateSubOptions: true,
             required: false,
@@ -4090,6 +4231,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
           }
         ],
       },
+      getLongTermSuccessSection("dental_receptionist"),
     ],
     "Dental Biller": [
       {
@@ -4140,10 +4282,12 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
             type: "grid",
             label: "How does your Virtual Assistant currently support you when using the following tools?",
             description: "Legend:\nNA – Not applicable: This tool is not part of your VA’s responsibilities\n1 – Guided: Performs tasks with guidance or direction\n2 – Assisted: Performs tasks with occasional guidance\n3 – Independent: Performs tasks independently in most cases\n4 – Advanced: Performs complex tasks independently",
+            gridInstruction: "You are not required to complete all rows in the grid. Please select only the tools that apply to your experience or only check the items that apply. You may leave the rest blank.",
             rows: [
               "Electronic Medical Record",
-              "Dental EMR",
-              "Insurance & Eligibility Tools"
+              "Dental PMS",
+              "Insurance & Eligibility Tools",
+              "Other"
             ],
             rowsWithCheckboxes: {
               "Electronic Medical Record": [
@@ -4161,7 +4305,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
                 "Allscripts",
                 "Other"
               ],
-              "Dental EMR": [
+              "Dental PMS": [
                 "Dentrix",
                 "Eaglesoft",
                 "Open Dental",
@@ -4179,6 +4323,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
                 "Other"
               ]
             },
+            rowsWithInputs: ["Other"],
             columns: ["NA", "1", "2", "3", "4"],
             rateSubOptions: true,
             required: false,
@@ -4304,6 +4449,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
           }
         ],
       },
+      getLongTermSuccessSection("dental_biller"),
     ],
     "Executive Assistant VA": [
       {
@@ -4351,10 +4497,12 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
             type: "grid",
             label: "How does your Virtual Assistant currently support you when using the following tools?",
             description: "Legend:\nNA – Not applicable: This tool is not part of your VA’s responsibilities\n1 – Guided: Performs tasks with guidance or direction\n2 – Assisted: Performs tasks with occasional guidance\n3 – Independent: Performs tasks independently in most cases\n4 – Advanced: Performs complex tasks independently",
+            gridInstruction: "You are not required to complete all rows in the grid. Please select only the tools that apply to your experience or only check the items that apply. You may leave the rest blank.",
             rows: [
               "Electronic Medical Record",
-              "Dental EMR",
-              "Insurance & Eligibility Tools"
+              "Dental PMS",
+              "Insurance & Eligibility Tools",
+              "Other"
             ],
             rowsWithCheckboxes: {
               "Electronic Medical Record": [
@@ -4372,7 +4520,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
                 "Allscripts",
                 "Other"
               ],
-              "Dental EMR": [
+              "Dental PMS": [
                 "Dentrix",
                 "Eaglesoft",
                 "Open Dental",
@@ -4390,6 +4538,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
                 "Other"
               ]
             },
+            rowsWithInputs: ["Other"],
             columns: ["NA", "1", "2", "3", "4"],
             rateSubOptions: true,
             required: true,
@@ -4515,6 +4664,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
           }
         ],
       },
+      getLongTermSuccessSection("ea"),
     ],
     "General Business VA": [
       {
@@ -4562,10 +4712,12 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
             type: "grid",
             label: "How does your Virtual Assistant currently support you when using the following tools?",
             description: "Legend:\nNA – Not applicable: This tool is not part of your VA’s responsibilities\n1 – Guided: Performs tasks with guidance or direction\n2 – Assisted: Performs tasks with occasional guidance\n3 – Independent: Performs tasks independently in most cases\n4 – Advanced: Performs complex tasks independently",
+            gridInstruction: "You are not required to complete all rows in the grid. Please select only the tools that apply to your experience or only check the items that apply. You may leave the rest blank.",
             rows: [
               "Electronic Medical Record",
-              "Dental EMR",
-              "Insurance & Eligibility Tools"
+              "Dental PMS",
+              "Insurance & Eligibility Tools",
+              "Other"
             ],
             rowsWithCheckboxes: {
               "Electronic Medical Record": [
@@ -4583,7 +4735,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
                 "Allscripts",
                 "Other"
               ],
-              "Dental EMR": [
+              "Dental PMS": [
                 "Dentrix",
                 "Eaglesoft",
                 "Open Dental",
@@ -4601,6 +4753,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
                 "Other"
               ]
             },
+            rowsWithInputs: ["Other"],
             columns: ["NA", "1", "2", "3", "4"],
             rateSubOptions: true,
             required: true,
@@ -4726,6 +4879,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
           }
         ],
       },
+      getLongTermSuccessSection("gb"),
     ],
   },
 };
@@ -5165,7 +5319,7 @@ export const SUPPORT_SURVEY_SCHEMA: SupportSurveySchema = {
             required: true,
           }
         ]
-      }
+      },
     ],
     "Sales and Placement": [
       {
@@ -5668,11 +5822,13 @@ export const SUPPORT_SURVEY_SCHEMA: SupportSurveySchema = {
             required: true,
           }
         ]
-      }
+      },
     ]
   }
 };
 
 export const FULL_SURVEY_SCHEMA: FullSurveySchema = {
   client: CLIENT_SURVEY_SCHEMA,
+  va: VA_SURVEY_SCHEMA,
+  support: SUPPORT_SURVEY_SCHEMA,
 };
