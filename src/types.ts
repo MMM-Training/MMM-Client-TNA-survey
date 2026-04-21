@@ -7,7 +7,8 @@ export type Role =
   | "Dental Receptionist"
   | "Dental Biller"
   | "Executive Assistant VA"
-  | "General Business VA";
+  | "General Business VA"
+  | "Other";
 
 export type SupportRole = "CDVO and OS" | "Sales and Placement";
 

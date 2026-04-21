@@ -247,6 +247,110 @@ const getLongTermSuccessSection = (roleId: string): Section => ({
   ]
 });
 
+const getCommunicationSkillsSection = (roleId: string, roleName: string): Section => ({
+  id: `${roleId}-communication-skills`,
+  title: "Part IV - Communication Skills",
+  questions: [
+    {
+      id: `${roleId}_comm_proficiency`,
+      type: "grid",
+      label: "How effectively does your Virtual Assistant communicate when performing the following tasks?",
+      description: "Legend:\nNA – Not applicable: Not part of your VA’s responsibilities\n1 – Requires close guidance: Communication may need clarification or follow-up\n2 – With occasional support: Communication is generally clear with some guidance\n3 – Works independently: Communication is clear and appropriate in most situations\n4 – Highly effective: Communication is clear, structured, and proactive",
+      rows: [
+        "Handling client calls → Communicating clearly, professionally, and confidently during calls",
+        "Responding to client emails/messages → Providing timely, accurate, and well-written responses",
+        "Posting updates on group chats / team channels → Sharing clear, concise, and actionable updates with the team",
+        "Preparing and submitting reports → Presenting information, updates, and data in a clear and organized manner",
+        "Managing appointment scheduling & changes → Communicating schedules, updates, and changes accurately and clearly",
+        "Updating documentation & records accurately → Recording complete, accurate, and easy-to-understand information"
+      ],
+      columns: ["NA", "1", "2", "3", "4"],
+      required: true,
+    },
+    {
+      id: `${roleId}_comm_essentiality`,
+      type: "grid",
+      label: "For each task, how important is it for your Virtual Assistant to handle it effectively in your day-to-day operations?",
+      description: "Legend:\nCore to the role – A key responsibility for your VA\nImportant – Adds value to your workflow but can be developed over time\nNice to have – Helpful, but not required for your VA’s role",
+      rows: [
+        "Handling client calls → Clear and professional verbal communication",
+        "Responding to client emails/messages → Timely and accurate written communication",
+        "Posting updates on group chats / team channels → Effective team communication and coordination",
+        "Preparing and submitting reports → Clear reporting and information sharing",
+        "Managing appointment scheduling & changes → Accurate coordination of schedules and expectations",
+        "Updating documentation & records accurately → Reliable and clear documentation for workflow continuity"
+      ],
+      columns: ["Core to the role", "Important", "Nice to have"],
+      required: true,
+    },
+    {
+      id: `${roleId}_verbal_comm_importance`,
+      type: "radio",
+      label: `How important is clear verbal communication for your Virtual Assistant to perform effectively in their role?\n(e.g., being easily understood during calls or voice interactions)`,
+      options: [
+        "Core to the role – Clear and easily understood verbal communication is essential for client/patient interactions",
+        "Important – Clear communication is preferred; minor variations in speech are manageable",
+        "Nice to have – Verbal communication is not a primary requirement for this role"
+      ],
+      required: true,
+    }
+  ],
+});
+
+const getAIEssentialsSection = (roleId: string): Section => ({
+  id: `${roleId}-ai-essentials`,
+  title: "Part V - AI Essentials",
+  questions: [
+    {
+      id: `${roleId}_ai_automation_level`,
+      type: "radio",
+      label: "To what extent is AI currently used in your workflow?",
+      options: [
+        "Minimal – Most tasks are done manually",
+        "Some use – AI supports certain tasks, with VAs handling most of the work",
+        "Significant use – AI supports many tasks, with VAs overseeing and executing key steps",
+        "Extensive use – AI is embedded across workflows, with VAs focusing on oversight and coordination"
+      ],
+      required: true,
+    },
+    {
+      id: `${roleId}_ai_tool_proficiency`,
+      type: "grid",
+      label: "What level of capability would you like your VA to have when using the following AI tools?",
+      description: "Legend:\n1 – Guided: Uses the tool with instructions or support\n2 – Assisted: Uses the tool independently for standard tasks\n3 – Independent: Uses the tool to improve efficiency and output\n4 – Advanced: Uses the tool to optimize workflows and enhance outcomes",
+      rows: [
+        "Generative AI (e.g., ChatGPT, Claude, Gemini)",
+        "Healthcare-specific AI / EMR systems (e.g., Dentrix, Epic, Athenahealth)",
+        "Data analysis & reporting tools with AI (e.g., Excel / Sheets AI features, dashboards)",
+        "Task & workflow automation AI (e.g., scheduling bots, reminders)",
+        "Other AI tools"
+      ],
+      rowsWithInputs: ["Other AI tools"],
+      columns: ["1", "2", "3", "4"],
+      required: true,
+    },
+    {
+      id: `${roleId}_ai_future_support`,
+      type: "checkbox",
+      label: "How do you see AI supporting your VA’s role over the next 6–12 months? (Select all that apply)",
+      options: [
+        "AI will support specific tasks, with VAs continuing to manage core responsibilities",
+        "AI will handle more routine work, allowing VAs to focus on higher-value tasks",
+        "AI will be more integrated into workflows, with VAs coordinating and overseeing processes",
+        "Workflows will remain mostly manual, with limited AI involvement",
+        "Not sure / still exploring how AI fits into our workflow"
+      ],
+      required: true,
+    }
+  ],
+});
+
+const getOtherRoleSections = (): Section[] => [
+  getCommunicationSkillsSection("other", "Other Role"),
+  getAIEssentialsSection("other"),
+  getLongTermSuccessSection("other"),
+];
+
 const getMedicalReceptionistSections = (): Section[] => {
   const role: Role = "Medical Receptionist";
   const tasks = [
@@ -2860,6 +2964,7 @@ export const VA_SURVEY_SCHEMA: SurveySchema = {
     "Dental Biller": getDentalBillerSections(),
     "Executive Assistant VA": getExecutiveAssistantVASections(),
     "General Business VA": getGeneralBusinessVASections(),
+    "Other": getOtherRoleSections(),
   },
 };
 
@@ -4881,6 +4986,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
       },
       getLongTermSuccessSection("gb"),
     ],
+    "Other": getOtherRoleSections(),
   },
 };
 

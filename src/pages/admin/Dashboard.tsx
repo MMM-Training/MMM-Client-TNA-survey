@@ -697,13 +697,55 @@ const AdminDashboard: React.FC = () => {
         aggregateGenericSection('dental-biller-competencies-skills', ['dental_biller_core_skills_upskill', 'dental_biller_specialized_skills_upskill'], true),
         aggregateGenericSection('ea-competencies-skills', ['ea_core_skills_upskill', 'ea_specialized_skills_upskill'], true),
         aggregateGenericSection('gb-competencies-skills', ['gb_core_skills_upskill', 'gb_specialized_skills_upskill'], true),
-        aggregateGenericSection('part-vi-long-term-success', ['va_retention_factors'], true),
+        aggregateGenericSection('biller-long-term-success', ['biller_retention_factors'], true),
+        aggregateGenericSection('receptionist-long-term-success', ['receptionist_retention_factors'], true),
+        aggregateGenericSection('admin-long-term-success', ['admin_retention_factors'], true),
+        aggregateGenericSection('scribe-long-term-success', ['scribe_retention_factors'], true),
+        aggregateGenericSection('educator-long-term-success', ['educator_retention_factors'], true),
+        aggregateGenericSection('dental_receptionist-long-term-success', ['dental_receptionist_retention_factors'], true),
+        aggregateGenericSection('dental_biller-long-term-success', ['dental_biller_retention_factors'], true),
+        aggregateGenericSection('ea-long-term-success', ['ea_retention_factors'], true),
+        aggregateGenericSection('gb-long-term-success', ['gb_retention_factors'], true),
+        aggregateGenericSection('other-long-term-success', ['other_retention_factors'], true),
       ]).slice(0, 15),
       
       longTermSuccess: {
-        frustrations: aggregateGenericSection('part-vi-long-term-success', 'common_frustrations', true),
-        upskilling: aggregateGenericSection('part-vi-long-term-success', 'upskilling_value', false),
-        retention: aggregateGenericSection('part-vi-long-term-success', 'va_retention_factors', true),
+        frustrations: mergeAggregates([
+          aggregateGenericSection('biller-long-term-success', 'biller_common_frustrations', true),
+          aggregateGenericSection('receptionist-long-term-success', 'receptionist_common_frustrations', true),
+          aggregateGenericSection('admin-long-term-success', 'admin_common_frustrations', true),
+          aggregateGenericSection('scribe-long-term-success', 'scribe_common_frustrations', true),
+          aggregateGenericSection('educator-long-term-success', 'educator_common_frustrations', true),
+          aggregateGenericSection('dental_receptionist-long-term-success', 'dental_receptionist_common_frustrations', true),
+          aggregateGenericSection('dental_biller-long-term-success', 'dental_biller_common_frustrations', true),
+          aggregateGenericSection('ea-long-term-success', 'ea_common_frustrations', true),
+          aggregateGenericSection('gb-long-term-success', 'gb_common_frustrations', true),
+          aggregateGenericSection('other-long-term-success', 'other_common_frustrations', true),
+        ]),
+        upskilling: mergeAggregates([
+          aggregateGenericSection('biller-long-term-success', 'biller_upskilling_value', false),
+          aggregateGenericSection('receptionist-long-term-success', 'receptionist_upskilling_value', false),
+          aggregateGenericSection('admin-long-term-success', 'admin_upskilling_value', false),
+          aggregateGenericSection('scribe-long-term-success', 'scribe_upskilling_value', false),
+          aggregateGenericSection('educator-long-term-success', 'educator_upskilling_value', false),
+          aggregateGenericSection('dental_receptionist-long-term-success', 'dental_receptionist_upskilling_value', false),
+          aggregateGenericSection('dental_biller-long-term-success', 'dental_biller_upskilling_value', false),
+          aggregateGenericSection('ea-long-term-success', 'ea_upskilling_value', false),
+          aggregateGenericSection('gb-long-term-success', 'gb_upskilling_value', false),
+          aggregateGenericSection('other-long-term-success', 'other_upskilling_value', false),
+        ]),
+        retention: mergeAggregates([
+          aggregateGenericSection('biller-long-term-success', 'biller_retention_factors', true),
+          aggregateGenericSection('receptionist-long-term-success', 'receptionist_retention_factors', true),
+          aggregateGenericSection('admin-long-term-success', 'admin_retention_factors', true),
+          aggregateGenericSection('scribe-long-term-success', 'scribe_retention_factors', true),
+          aggregateGenericSection('educator-long-term-success', 'educator_retention_factors', true),
+          aggregateGenericSection('dental_receptionist-long-term-success', 'dental_receptionist_retention_factors', true),
+          aggregateGenericSection('dental_biller-long-term-success', 'dental_biller_retention_factors', true),
+          aggregateGenericSection('ea-long-term-success', 'ea_retention_factors', true),
+          aggregateGenericSection('gb-long-term-success', 'gb_retention_factors', true),
+          aggregateGenericSection('other-long-term-success', 'other_retention_factors', true),
+        ]),
       },
 
       systemRequirements: mergeAggregates([
@@ -752,6 +794,7 @@ const AdminDashboard: React.FC = () => {
         aggregateGenericSection('dental-biller-communication-skills', 'dental_biller_comm_proficiency', false),
         aggregateGenericSection('ea-communication-skills', 'ea_comm_proficiency', false),
         aggregateGenericSection('gb-communication-skills', 'gb_comm_proficiency', false),
+        aggregateGenericSection('other-communication-skills', 'other_comm_proficiency', false),
       ]).slice(0, 10),
  
       aiEssentials: mergeAggregates([
@@ -764,6 +807,7 @@ const AdminDashboard: React.FC = () => {
         aggregateGenericSection('dental-biller-ai-essentials', ['dental_biller_ai_automation_level', 'dental_biller_ai_tool_proficiency'], false),
         aggregateGenericSection('ea-ai-essentials', ['ea_ai_automation_level', 'ea_ai_tool_proficiency'], false),
         aggregateGenericSection('gb-ai-essentials', ['gb_ai_automation_level', 'gb_ai_tool_proficiency'], false),
+        aggregateGenericSection('other-ai-essentials', ['other_ai_automation_level', 'other_ai_tool_proficiency'], false),
       ]).slice(0, 10),
  
       confidence: [],
@@ -780,6 +824,7 @@ const AdminDashboard: React.FC = () => {
           'Dental Biller': ['dental_biller_proficiency_grid', 'dental_biller_comm_proficiency'],
           'Executive Assistant VA': ['ea_proficiency_grid', 'ea_comm_proficiency'],
           'General Business VA': ['gb_proficiency_grid', 'gb_comm_proficiency'],
+          'Other': ['other_comm_proficiency'],
         };
  
         responses.forEach(res => {

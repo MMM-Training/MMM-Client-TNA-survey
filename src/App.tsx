@@ -128,22 +128,29 @@ function SurveyApp() {
       // 1. Initial Info
       allSteps.push({ ...FULL_SURVEY_SCHEMA.client.initial });
 
-      // 2. Part 2 for all roles
-      selectedRoles.forEach((role, index) => {
+      // Identify roles that are NOT "Other"
+      const realRoles = selectedRoles.filter(r => r !== "Other");
+
+      // 2. Part 2 for all REAL roles (Task proficiency sections)
+      realRoles.forEach((role) => {
         const sections = FULL_SURVEY_SCHEMA.client.roleSections[role];
         if (sections && sections[0]) {
           allSteps.push({ ...sections[0], role });
         }
       });
 
-      // 3. Remaining parts for the FIRST role ONLY
-      const firstRole = selectedRoles[0];
-      if (firstRole) {
+      // 3. Remaining parts (Competencies, Comm, AI, Long-Term Success)
+      if (realRoles.length > 0) {
+        // Full survey for the first real role
+        const firstRole = realRoles[0];
         const sections = FULL_SURVEY_SCHEMA.client.roleSections[firstRole];
         if (sections && sections.length > 1) {
-          // Add Part 3, 4, 5 (indices 1, 2, 3)
           sections.slice(1).forEach(s => allSteps.push({ ...s, role: firstRole }));
         }
+      } else if (selectedRoles.includes("Other")) {
+        // ONLY "Other" selected (or at least no real roles)
+        const sections = FULL_SURVEY_SCHEMA.client.roleSections["Other"] || [];
+        sections.forEach(s => allSteps.push({ ...s, role: "Other" }));
       }
 
       return allSteps;
