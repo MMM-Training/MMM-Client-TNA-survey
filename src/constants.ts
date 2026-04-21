@@ -2867,7 +2867,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
   initial: {
     id: "client-initial",
     title: "Client Information",
-    description: "Dear Client, \n\nWe’re excited to announce that we’re designing a VA Upskilling Program to help your VAs grow, become more confident, and deliver even more impact for your business!\n\nWe’d love your feedback to make sure the program hits the mark and focuses on what truly matters for your team.\n\nBy sharing your insights, you’ll help us:\n• Tailor task-specific training to your workflows\n• Identify the skills that matter most for your team’s success\n• Empower your VAs to be ready, confident, and fully supported\n\nYour input is key — together, we can equip your VAs to thrive and deliver their best every day!\n\nThis will take about 3–5 minutes to complete.\n\nThank you!",
+    description: "Dear Client, \n\nWe’re excited to announce that we’re designing a VA Upskilling Program to help your VAs grow, become more confident, and deliver even more impact for your business!\n\nWe’d love your feedback to make sure the program hits the mark and focuses on what truly matters for your team.\n\nBy sharing your insights, you’ll help us:\n• Tailor task-specific training to your workflows\n• Identify the skills that matter most for your team’s success\n• Empower your VAs to be ready, confident, and fully supported\n\nYour input is key — together, we can equip your VAs to thrive and deliver their best every day!\n\nThis will take about 10 minutes to complete.\n\nThank you!",
     questions: [
       {
         id: "full_name",
